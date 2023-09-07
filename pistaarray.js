@@ -83,6 +83,7 @@ export class Pista {
       }
       
       this.scene.add(this.pista);
+      
 
     }
     

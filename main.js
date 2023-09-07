@@ -15,7 +15,7 @@ import {initRenderer,
 let scene, renderer, camera, material, light, orbit; // Initial variables
 scene = new THREE.Scene();    // Create main scene
 renderer = initRenderer();    // Init a basic renderer
-camera = initCamera(new THREE.Vector3(35,15,60)); // Init camera in this position
+camera = initCamera(new THREE.Vector3(20,5,60)); // Init camera in this position
 light = initDefaultBasicLight(scene);
 orbit = new OrbitControls( camera, renderer.domElement ); // Enable mouse rotation, pan, zoom etc.
 // initDefaultSpotlight(scene, new THREE.Vector3(35, 20, 30)); // Use default light
@@ -34,7 +34,7 @@ scene.add(plane);
 
 var keyboard = new KeyboardState();
 
-var trackballControls = new TrackballControls( camera, renderer.domElement );
+let trackballControls = new TrackballControls( camera, renderer.domElement );
 
 
 const pista = new Pista(listaPistas[pistaEscolhida].id, listaPistas[pistaEscolhida].posicoes, scene);
@@ -60,7 +60,7 @@ function render()
 {
   carro.keyboardUpdate();
   trackballControls.update();
-  // trackballControls.target.copy(carro.carro.position); // Camera following object
+ // trackballControls.target.copy(carro.carro.position); // Camera following object
 
   requestAnimationFrame(render);
   renderer.render(scene, camera) // Render scene
