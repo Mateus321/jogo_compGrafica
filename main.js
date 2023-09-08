@@ -8,6 +8,7 @@ import {initRenderer,
         initCamera,
         initDefaultSpotlight,
         initDefaultBasicLight,
+        SecondaryBox,
         InfoBox,
         onWindowResize,
         createGroundPlaneXZ} from "../libs/util/util.js";
@@ -37,8 +38,22 @@ var keyboard = new KeyboardState();
 let trackballControls = new TrackballControls( camera, renderer.domElement );
 
 
+let voltasMessage = new SecondaryBox("");
+
 const pista = new Pista(listaPistas[pistaEscolhida].id, listaPistas[pistaEscolhida].posicoes, scene);
 const carro = new Carro(scene, pista.getInicial(), keyboard);
+
+voltasMessage.changeStyle("rgba(0,0,0,0)", "white", "32px", "ubuntu")
+voltasMessage.box.style.bottom = "92%";
+voltasMessage.box.style.left = "2%";
+
+
+function updateVoltasMessage()
+{
+   let str =  "Voltas: " + carro.voltas;
+   voltasMessage.changeMessage(str);
+}
+
 render();
 
 
@@ -58,12 +73,12 @@ render();
 
 function render()
 {
+  updateVoltasMessage();
   carro.keyboardUpdate();
   trackballControls.update();
- trackballControls.target.copy(carro.carro.position); // Camera following object
+  trackballControls.target.copy(carro.carro.position); // Camera following object
   if(pista.checkpointsVisitados(carro)){
     carro.voltas += 1;
-    console.log(carro.voltas);
     carro.checkpointsVisitados = [];
     pista.proximoCheckpoint = 0;
   }
