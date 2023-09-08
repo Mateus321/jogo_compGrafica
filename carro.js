@@ -35,6 +35,8 @@ export class Carro {
         this.scene = scene
         this.inicial = inicial;
         this.keyboard = keyboard;
+        this.checkpointsVisitados = [];
+        this.voltas = 0;
 
         this.criaChassi = function(){
             let caixa = new THREE.BoxGeometry(10, 2, 5);
@@ -70,11 +72,23 @@ export class Carro {
             return roda;
         }
 
+        this.criaAerofolio = () => {
+            const geometria_aerofolio = new THREE.BoxGeometry (1,0.8,7);
+            const material_aerofolio = new THREE.MeshPhongMaterial ( {color: 0XF0130A });
+            const aerofolio = new THREE.Mesh(geometria_aerofolio, material_aerofolio);
+            return aerofolio;
+        }
+
         this.carro = new THREE.Object3D();
 
 
         const chassi = this.criaChassi();
         this.carro.add(chassi);
+
+        const aerofolio = this.criaAerofolio();
+        this.carro.add(aerofolio);
+        aerofolio.translateX(5);
+        aerofolio.translateY(1);
 
         const eixo_frente = this.criarEixo();
         chassi.add(eixo_frente);
@@ -190,6 +204,14 @@ export class Carro {
             this.carro.translateX(this.velocidade);
         }
 
+        this.getPos = () => {
+            let posicao = [];
+            posicao.push(this.carro.position.x);
+            posicao.push(this.carro.position.y);
+            posicao.push(this.carro.position.z);
+            return posicao;
+        }
+
 
         this.keyboardUpdate = () => {
 
@@ -204,14 +226,14 @@ export class Carro {
             else this.desacelerarRe();
           
             if ( this.keyboard.pressed("left") ){ 
-                if(this.velocidade < 0) this.carro.rotateY(  angle/4 );
+                if(this.velocidade != 0) this.carro.rotateY(  angle/4 );
                 if(calota_frente_direita.rotation.z >= -maxRotation){
                 calota_frente_direita.rotateZ(-angle/2);
                 calota_frente_esquerda.rotateZ(-angle/2);
                 }
             }  
             else if ( this.keyboard.pressed("right") ){
-                if(this.velocidade < 0) this.carro.rotateY( -angle/4 );
+                if(this.velocidade != 0) this.carro.rotateY( -angle/4 );
                 if(calota_frente_direita.rotation.z <= maxRotation){
                 calota_frente_direita.rotateZ(angle/2);
                 calota_frente_esquerda.rotateZ(angle/2);

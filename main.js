@@ -15,7 +15,7 @@ import {initRenderer,
 let scene, renderer, camera, material, light, orbit; // Initial variables
 scene = new THREE.Scene();    // Create main scene
 renderer = initRenderer();    // Init a basic renderer
-camera = initCamera(new THREE.Vector3(20,5,60)); // Init camera in this position
+camera = initCamera(new THREE.Vector3(30,15,45)); // Init camera in this position
 light = initDefaultBasicLight(scene);
 orbit = new OrbitControls( camera, renderer.domElement ); // Enable mouse rotation, pan, zoom etc.
 // initDefaultSpotlight(scene, new THREE.Vector3(35, 20, 30)); // Use default light
@@ -60,8 +60,13 @@ function render()
 {
   carro.keyboardUpdate();
   trackballControls.update();
- // trackballControls.target.copy(carro.carro.position); // Camera following object
-
+ trackballControls.target.copy(carro.carro.position); // Camera following object
+  if(pista.checkpointsVisitados(carro)){
+    carro.voltas += 1;
+    console.log(carro.voltas);
+    carro.checkpointsVisitados = [];
+    pista.proximoCheckpoint = 0;
+  }
   requestAnimationFrame(render);
   renderer.render(scene, camera) // Render scene
 }

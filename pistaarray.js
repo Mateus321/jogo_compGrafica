@@ -50,19 +50,29 @@ export const listaPistas = [
   ] }
 ]
 
+
 export class Pista {
   constructor(id, posicoes, scene) {
     this.id = id;
     this.posicoes = posicoes;
     this.scene = scene;
 
+    this.checkpoints = [new THREE.Vector3(10.0,0.0,40.0),
+                        new THREE.Vector3(0.0,0.0,0.0),
+                        new THREE.Vector3(40.0,0.0,0.0),
+                        new THREE.Vector3(40.0,0.0,40.0),
+                        new THREE.Vector3(10.0,0.0,40.0)];
+
+
+    this.proximoCheckpoint = 0;
+                   
 
     const materialInicial = new THREE.MeshBasicMaterial( {color: 0xe85907});
 
     const cubeGeometry = new THREE.BoxGeometry(10, 0.3, 10);
 
 
-    const material = new THREE.MeshBasicMaterial( {color: 0x262729});
+    const material = new THREE.MeshBasicMaterial({color: 0x262729});
 
     this.pista = new THREE.Object3D();
 
@@ -83,8 +93,28 @@ export class Pista {
       }
       
       this.scene.add(this.pista);
-      
 
+    this.proximoCheckpointVisitado = (carro) => {
+      if(this.proximoCheckpoint < this.checkpoints.length){
+      const proximo = this.checkpoints[this.proximoCheckpoint];
+      const distancia = carro.carro.position.distanceTo(proximo);
+      const distanciaLimite = 10.0;
+      if (distancia < distanciaLimite) {
+        carro.checkpointsVisitados.push(proximo);
+        this.proximoCheckpoint++;
+        return true;
+        }
+      }
+  
+      return false;
+    }
+    
+    this.checkpointsVisitados = (carro) => {
+      this.proximoCheckpointVisitado(carro);
+      return this.checkpoints.every((checkpoint) => { 
+        return carro.checkpointsVisitados.includes(checkpoint);
+      })
+    }
     }
     
   } 
