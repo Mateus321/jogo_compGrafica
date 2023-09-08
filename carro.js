@@ -168,16 +168,26 @@ export class Carro {
 
         this.freiar = () => {
          this.velocidade -= this.aceleracao*3;
+         this.velocidade = Number(this.velocidade.toFixed(3));
         }
 
         this.re = () => {
             if(this.velocidade < 0) this.freiar();
             else{
-                if(this.velocidade <= -this.limiteVelocidade/3){
+                if(this.velocidade <= -this.limiteVelocidade/2.4){
                     this.velocidade -= this.aceleracao;
+                    this.velocidade = Number(this.velocidade.toFixed(3));
                 }
                 this.carro.translateX(this.velocidade);
             }
+        }
+
+        this.desacelerarRe = () =>{
+            if(this.velocidade > 0){
+                this.velocidade += this.aceleracao;
+                this.velocidade = Number(this.velocidade.toFixed(3));
+                }
+            this.carro.translateX(this.velocidade);
         }
 
 
@@ -188,15 +198,10 @@ export class Carro {
 
             this.keyboard.update();
           
-            if ( this.keyboard.pressed("X") ){
-                this.acelerar();
-                pneu_frente_direita.rotateZ(angle);
-                pneu_frente_esquerda.rotateZ(angle);
-            }else{
-                this.desacelerar();
-                console.log(this.velocidade);
-            }
+            if ( this.keyboard.pressed("X") ) this.acelerar();
+            else this.desacelerar();
             if ( this.keyboard.pressed("down") )  this.re();
+            else this.desacelerarRe();
           
             if ( this.keyboard.pressed("left") ){ 
                 if(this.velocidade < 0) this.carro.rotateY(  angle/4 );
