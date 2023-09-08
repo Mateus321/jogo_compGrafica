@@ -76,6 +76,7 @@ function render()
   updateVoltasMessage();
   carro.keyboardUpdate();
   trackballControls.update();
+  carro.penalidade(pista);
   trackballControls.target.copy(carro.carro.position); // Camera following object
   if(pista.checkpointsVisitados(carro)){
     carro.voltas += 1;

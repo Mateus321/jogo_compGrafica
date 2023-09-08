@@ -162,7 +162,7 @@ export class Carro {
         
         this.velocidade = 0;
 
-        this.limiteVelocidade = -0.24;
+        this.limiteVelocidade = -0.16;
 
         this.acelerar = () =>{
             if(this.velocidade > this.limiteVelocidade){
@@ -185,6 +185,7 @@ export class Carro {
          this.velocidade = Number(this.velocidade.toFixed(3));
         }
 
+
         this.re = () => {
             if(this.velocidade < 0) this.freiar();
             else{
@@ -196,7 +197,7 @@ export class Carro {
             }
         }
 
-        this.desacelerarRe = () =>{
+        this.desacelerarRe = () => {
             if(this.velocidade > 0){
                 this.velocidade += this.aceleracao;
                 this.velocidade = Number(this.velocidade.toFixed(3));
@@ -204,14 +205,37 @@ export class Carro {
             this.carro.translateX(this.velocidade);
         }
 
-        this.getPos = () => {
-            let posicao = [];
-            posicao.push(this.carro.position.x);
-            posicao.push(this.carro.position.y);
-            posicao.push(this.carro.position.z);
-            return posicao;
+        this.estaNaPista = (pista) => {
+            let posicoesVector3 = []
+            for(let i = 0; i < pista.pista.children.length; i++){
+                posicoesVector3[i] = pista.pista.children[i].position;
+                let carroNaPista = posicoesVector3.some((posicaoVector3) => {
+                    const distanciaLimite = 7;
+                    let distancia = this.carro.position.distanceTo(posicaoVector3);
+                    return distancia < distanciaLimite
+                });
+                if(carroNaPista){
+                    return true;
+                    
+                } 
+            }
+            return false;  
         }
 
+        this.penalidade = (pista) => {
+            console.log(this.velocidade);
+            console.log(this.estaNaPista(pista));
+            if(!this.estaNaPista(pista)){
+            this.limiteVelocidade = -0.08;
+            if(this.velocidade < this.limiteVelocidade){
+                this.velocidade = this.limiteVelocidade;
+            }
+            }else{
+                this.limiteVelocidade = -0.16;
+            }
+        }
+
+        
 
         this.keyboardUpdate = () => {
 

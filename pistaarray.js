@@ -105,7 +105,6 @@ export class Pista {
         return true;
         }
       }
-  
       return false;
     }
     
@@ -115,9 +114,10 @@ export class Pista {
         return carro.checkpointsVisitados.includes(checkpoint);
       })
     }
-    }
+  }
+}
+
     
-  } 
 
 
 
