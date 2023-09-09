@@ -14,55 +14,63 @@ import {initRenderer,
 
 // create the ground plane
 export const listaPistas = [
-  { id: 1, posicoes: [[20.0, 0.0, 40.0],
-                      [40.0, 0.0, 20.0],
-                      [20.0, 0.0, 0.0],
-                      [0.0, 0.0, 0.0],
-                      [10.0, 0.0, 0.0],
-                      [30.0, 0.0, 0.0],
-                      [40.0, 0.0, 0.0],
-                      [40.0, 0.0, 10.0],
-                      [40.0, 0.0, 30.0],
-                      [40.0, 0.0, 40.0],
-                      [30.0, 0.0, 40.0],
-                      [10.0, 0.0, 40.0],
-                      [0.0, 0.0, 40.0],
-                      [0.0, 0.0, 30.0],
-                      [0.0, 0.0, 20.0],
-                      [0.0, 0.0, 10.0],
-  ] },
-  { id: 2, posicoes: [[20.0, 0.0, 40.0],
-                      [40.0, 0.0, 20.0],
-                      [20.0, 0.0, 0.0],
-                      [0.0, 0.0, 0.0],
-                      [10.0, 0.0, 0.0],
-                      [20.0, 0.0, 10.0],
-                      [20.0, 0.0, 20.0],
-                      [30.0, 0.0, 20.0],
-                      [40.0, 0.0, 30.0],
-                      [40.0, 0.0, 40.0],
-                      [30.0, 0.0, 40.0],
-                      [10.0, 0.0, 40.0],
-                      [0.0, 0.0, 40.0],
-                      [0.0, 0.0, 30.0],
-                      [0.0, 0.0, 20.0],
-                      [0.0, 0.0, 10.0],
-  ] }
+  { id: 1, 
+    posicoes: [[20.0, 0.0, 40.0],
+              [40.0, 0.0, 20.0],
+              [20.0, 0.0, 0.0],
+              [0.0, 0.0, 0.0],
+              [10.0, 0.0, 0.0],
+              [30.0, 0.0, 0.0],
+              [40.0, 0.0, 0.0],
+              [40.0, 0.0, 10.0],
+              [40.0, 0.0, 30.0],
+              [40.0, 0.0, 40.0],
+              [30.0, 0.0, 40.0],
+              [10.0, 0.0, 40.0],
+              [0.0, 0.0, 40.0],
+              [0.0, 0.0, 30.0],
+              [0.0, 0.0, 20.0],
+              [0.0, 0.0, 10.0],
+  ],
+  checkpoints:  [new THREE.Vector3(10.0,0.0,40.0),
+                 new THREE.Vector3(0.0,0.0,0.0),
+                 new THREE.Vector3(40.0,0.0,0.0),
+                 new THREE.Vector3(40.0,0.0,40.0),
+                 new THREE.Vector3(10.0,0.0,40.0)]
+  },
+  { id: 2, 
+    posicoes: [[20.0, 0.0, 40.0],
+              [40.0, 0.0, 20.0],
+              [20.0, 0.0, 0.0],
+              [0.0, 0.0, 0.0],
+              [10.0, 0.0, 0.0],
+              [20.0, 0.0, 10.0],
+              [20.0, 0.0, 20.0],
+              [30.0, 0.0, 20.0],
+              [40.0, 0.0, 30.0],
+              [40.0, 0.0, 40.0],
+              [30.0, 0.0, 40.0],
+              [10.0, 0.0, 40.0],
+              [0.0, 0.0, 40.0],
+              [0.0, 0.0, 30.0],
+              [0.0, 0.0, 20.0],
+              [0.0, 0.0, 10.0],
+  ],
+  checkpoints:  [new THREE.Vector3(10.0,0.0,40.0),
+                 new THREE.Vector3(0.0,0.0,0.0),
+                 new THREE.Vector3(20.0,0.0,20.0),
+                 new THREE.Vector3(40.0,0.0,20.0),
+                 new THREE.Vector3(10.0,0.0,40.0)] 
+                }
 ]
 
 
 export class Pista {
-  constructor(id, posicoes, scene) {
+  constructor(id, posicoes, checkpoints, scene) {
     this.id = id;
     this.posicoes = posicoes;
     this.scene = scene;
-
-    this.checkpoints = [new THREE.Vector3(10.0,0.0,40.0),
-                        new THREE.Vector3(0.0,0.0,0.0),
-                        new THREE.Vector3(40.0,0.0,0.0),
-                        new THREE.Vector3(40.0,0.0,40.0),
-                        new THREE.Vector3(10.0,0.0,40.0)];
-
+    this.checkpoints = checkpoints;
 
     this.proximoCheckpoint = 0;
                    
@@ -92,7 +100,15 @@ export class Pista {
         return this.posicoes[0];
       }
       
-      this.scene.add(this.pista);
+    this.scene.add(this.pista);
+
+    this.removePista = () => {
+      for( let i = this.pista.children.length - 1; i >=0 ;i--){
+        let obj = this.pista.children[i];
+        this.pista.remove(obj);
+      }
+      this.scene.remove(this.pista);
+    }
 
     this.proximoCheckpointVisitado = (carro) => {
       if(this.proximoCheckpoint < this.checkpoints.length){
@@ -116,6 +132,7 @@ export class Pista {
     }
   }
 }
+
 
     
 
