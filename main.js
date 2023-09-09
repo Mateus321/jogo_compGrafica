@@ -40,7 +40,7 @@ let trackballControls = new TrackballControls( camera, renderer.domElement );
 
 let voltasMessage = new SecondaryBox("");
 
-const pista = new Pista(listaPistas[pistaEscolhida].id, listaPistas[pistaEscolhida].posicoes, scene);
+let pista = new Pista(listaPistas[pistaEscolhida].id, listaPistas[pistaEscolhida].posicoes, listaPistas[pistaEscolhida].checkpoints, scene);
 const carro = new Carro(scene, pista.getInicial(), keyboard);
 
 voltasMessage.changeStyle("rgba(0,0,0,0)", "white", "32px", "ubuntu")
@@ -52,6 +52,28 @@ function updateVoltasMessage()
 {
    let str =  "Voltas: " + carro.voltas;
    voltasMessage.changeMessage(str);
+}
+
+const trocaPista = () => {
+  if(pista){
+    pista.removePista();
+  }
+  const novaPista = new Pista(listaPistas[pistaEscolhida].id, listaPistas[pistaEscolhida].posicoes, listaPistas[pistaEscolhida].checkpoints, scene);
+  let inicial = novaPista.getInicial();
+  carro.reset();
+  return novaPista;
+}
+
+const keyboardUpdate = () => {
+  keyboard.update();
+  if(keyboard.down("1")){
+    pistaEscolhida = 0;
+    pista = trocaPista();
+  }
+  if(keyboard.down("2")){
+    pistaEscolhida = 1;
+    pista = trocaPista();
+  } 
 }
 
 render();
@@ -74,6 +96,7 @@ render();
 function render()
 {
   updateVoltasMessage();
+  keyboardUpdate();
   carro.keyboardUpdate();
   trackballControls.update();
   carro.penalidade(pista);

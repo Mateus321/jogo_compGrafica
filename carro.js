@@ -79,16 +79,50 @@ export class Carro {
             return aerofolio;
         }
 
+        this.criaFarol = () => {
+            const geometria_farol = new THREE.CylinderGeometry(0.4, 0.4, 0.2, 24);
+            const material_farol = new THREE.MeshPhongMaterial({ color: 0xfff87a})
+            const farol = new THREE.Mesh(geometria_farol, material_farol);
+            return farol
+        }
+
+        this.criaCabine = () => {
+            const geometria_cabine = new THREE.CylinderGeometry(2.5, 2.5, 4, 24, 1, false, 0, Math.PI);
+            const material_cabine = new THREE.MeshPhongMaterial({ color: 0xF0130A });
+            const cabine = new THREE.Mesh(geometria_cabine, material_cabine);
+            return cabine;
+        }
+
         this.carro = new THREE.Object3D();
 
 
         const chassi = this.criaChassi();
         this.carro.add(chassi);
 
+        // const cabine = this.criaCabine();
+        // this.carro.add(cabine);
+        // cabine.rotateZ(Math.PI/2);
+        // cabine.translateY(3);
+        // cabine.translateX(0.7);
+
         const aerofolio = this.criaAerofolio();
         this.carro.add(aerofolio);
         aerofolio.translateX(5);
         aerofolio.translateY(1);
+
+        const farol_direito = this.criaFarol();
+        this.carro.add(farol_direito);
+        farol_direito.rotateZ(Math.PI/2);
+        farol_direito.translateY(5);
+        farol_direito.translateZ(-1.6);
+        farol_direito.translateX(0.3);
+
+        const farol_esquerdo = this.criaFarol();
+        this.carro.add(farol_esquerdo);
+        farol_esquerdo.rotateZ(Math.PI/2);
+        farol_esquerdo.translateY(5);
+        farol_esquerdo.translateZ(1.6);
+        farol_esquerdo.translateX(0.3);
 
         const eixo_frente = this.criarEixo();
         chassi.add(eixo_frente);
@@ -223,8 +257,6 @@ export class Carro {
         }
 
         this.penalidade = (pista) => {
-            console.log(this.velocidade);
-            console.log(this.estaNaPista(pista));
             if(!this.estaNaPista(pista)){
             this.limiteVelocidade = -0.08;
             if(this.velocidade < this.limiteVelocidade){
@@ -233,6 +265,14 @@ export class Carro {
             }else{
                 this.limiteVelocidade = -0.16;
             }
+        }
+
+        this.reset = () => {
+            this.carro.position.set(inicial[0], inicial[1]+0.58, inicial[2]);
+            this.velocidade = 0;
+            this.carro.rotation.x = 0;
+            this.carro.rotation.y = 0;
+            this.carro.rotation.z = 0;
         }
 
         
