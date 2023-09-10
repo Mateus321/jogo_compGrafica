@@ -39,6 +39,7 @@ let trackballControls = new TrackballControls( camera, renderer.domElement );
 
 
 let voltasMessage = new SecondaryBox("");
+let tempMessage = new SecondaryBox("");
 
 let pista = new Pista(listaPistas[pistaEscolhida].id, listaPistas[pistaEscolhida].posicoes, listaPistas[pistaEscolhida].checkpoints, scene);
 const carro = new Carro(scene, pista.getInicial(), keyboard);
@@ -47,11 +48,20 @@ voltasMessage.changeStyle("rgba(0,0,0,0)", "white", "32px", "ubuntu")
 voltasMessage.box.style.bottom = "92%";
 voltasMessage.box.style.left = "2%";
 
+tempMessage.changeStyle("rgba(0,0,0,0)", "white", "32px", "ubuntu")
+tempMessage.box.style.bottom = "88%";
+tempMessage.box.style.left = "2%";
 
 function updateVoltasMessage()
 {
    let str =  "Voltas: " + carro.voltas;
    voltasMessage.changeMessage(str);
+}
+
+function updateTempMenssage()
+{
+    let str = "Tempo total: " + carro.tempo;
+    tempMessage.changeMessage(str);
 }
 
 const trocaPista = () => {
@@ -76,26 +86,31 @@ const keyboardUpdate = () => {
   } 
 }
 
+
+const start = () => {
+    carro.cron = setInterval(() => {time()}, carro.temp);
+} 
+
+const time = ( ) => {
+  carro.ss++;
+
+  if(carro.ss == 60)
+  {
+    carro.ss = 0;
+    carro.mm++;
+  }
+  
+  let format = (carro.mm < 10 ? '0' + carro.mm : carro.mm ) + ':' + (carro.ss < 10 ? '0' + carro.ss : carro.ss);
+            
+  carro.tempo = format;
+}
+start();
 render();
-
-
-
-
-// Use this to show information onscreen
-// let controls = new InfoBox();
-//   controls.add("Basic Scene");
-//   controls.addParagraph();
-//   controls.add("Use mouse to interact:");
-//   controls.add("* Left button to rotate");
-//   controls.add("* Right button to translate (pan)");
-//   controls.add("* Scroll to zoom in/out.");
-//   controls.show();
-
-
 
 function render()
 {
   updateVoltasMessage();
+  updateTempMenssage();
   keyboardUpdate();
   carro.keyboardUpdate();
   trackballControls.update();
@@ -106,6 +121,8 @@ function render()
     carro.checkpointsVisitados = [];
     pista.proximoCheckpoint = 0;
   }
+  
   requestAnimationFrame(render);
   renderer.render(scene, camera) // Render scene
+  
 }

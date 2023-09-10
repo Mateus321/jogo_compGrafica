@@ -37,6 +37,11 @@ export class Carro {
         this.keyboard = keyboard;
         this.checkpointsVisitados = [];
         this.voltas = 0;
+        this.temp = 1000;
+        this.cron;
+        this.mm = 0;
+        this.ss = 0;
+        this.tempo = '';
 
         this.criaChassi = function(){
             let caixa = new THREE.BoxGeometry(10, 2, 5);
@@ -218,7 +223,7 @@ export class Carro {
          this.velocidade -= this.aceleracao*3;
          this.velocidade = Number(this.velocidade.toFixed(3));
         }
-
+        
 
         this.re = () => {
             if(this.velocidade < 0) this.freiar();
@@ -267,14 +272,19 @@ export class Carro {
             }
         }
 
-        this.reset = () => {
+        this.resetPos = () => {
             this.carro.position.set(inicial[0], inicial[1]+0.58, inicial[2]);
-            this.velocidade = 0;
             this.carro.rotation.x = 0;
             this.carro.rotation.y = 0;
             this.carro.rotation.z = 0;
         }
 
+        this.reset = () => {
+            this.resetPos();
+            this.velocidade = 0;
+            this.voltas = 0;
+            
+        }    
         
 
         this.keyboardUpdate = () => {
@@ -315,6 +325,9 @@ export class Carro {
             }
           }   
     }
+
+
+
 }
         
 
