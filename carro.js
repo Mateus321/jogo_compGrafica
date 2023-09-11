@@ -36,9 +36,10 @@ export class Carro {
         this.inicial = inicial;
         this.keyboard = keyboard;
         this.checkpointsVisitados = [];
-        this.voltas = 0;
-        this.temp = 1000;
+        this.voltas = 3;
+        this.temp = 1;
         this.cron;
+        this.ms = 0;
         this.mm = 0;
         this.ss = 0;
         this.tempo = '';

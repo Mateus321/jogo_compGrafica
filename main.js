@@ -55,6 +55,12 @@ tempMessage.box.style.left = "2%";
 function updateVoltasMessage()
 {
    let str =  "Voltas: " + carro.voltas;
+   if(carro.voltas == 4){
+    str = "Voce finalizou a corrida!!!" 
+    pause();
+    carro.velocidade = 0;
+    carro.aceleracao = 0;
+   }
    voltasMessage.changeMessage(str);
 }
 
@@ -90,16 +96,25 @@ const start = () => {
     carro.cron = setInterval(() => {time()}, carro.temp);
 } 
 
-const time = ( ) => {
-  carro.ss++;
+const pause = () => {
+  clearInterval(carro.cron);
+}
 
-  if(carro.ss == 60)
+const time = ( ) => {
+  carro.ms++;
+
+  if(carro.ms == 60)
   {
-    carro.ss = 0;
-    carro.mm++;
+    carro.ms = 0;
+    carro.ss++;
+    if(carro.ss == 60){
+      carro.ss = 0;
+      carro.mm++;
+      
+    }
   }
   
-  let format = (carro.mm < 10 ? '0' + carro.mm : carro.mm ) + ':' + (carro.ss < 10 ? '0' + carro.ss : carro.ss);
+  let format = (carro.mm < 10 ? '0' + carro.mm : carro.mm) + ':' + (carro.ss < 10 ? '0' + carro.ss : carro.ss) + ':' + (carro.ms < 10 ? '0' + carro.ms : carro.ms);
             
   carro.tempo = format;
 }
@@ -119,6 +134,7 @@ function render()
     carro.voltas += 1;
     carro.checkpointsVisitados = [];
     pista.proximoCheckpoint = 0;
+  
   }
   
   requestAnimationFrame(render);
