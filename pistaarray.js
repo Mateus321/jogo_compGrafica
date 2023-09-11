@@ -75,12 +75,12 @@ export class Pista {
     this.proximoCheckpoint = 0;
                    
 
-    const materialInicial = new THREE.MeshBasicMaterial( {color: 0xe85907});
+    const materialInicial = new THREE.MeshPhongMaterial( {color: 0xe85907});
 
     const cubeGeometry = new THREE.BoxGeometry(10, 0.3, 10);
 
 
-    const material = new THREE.MeshBasicMaterial({color: 0x262729});
+    const material = new THREE.MeshPhongMaterial({color: 0x262729});
 
     this.pista = new THREE.Object3D();
 

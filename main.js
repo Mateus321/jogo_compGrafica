@@ -16,7 +16,9 @@ import {initRenderer,
 let scene, renderer, camera, material, light, orbit; // Initial variables
 scene = new THREE.Scene();    // Create main scene
 renderer = initRenderer();    // Init a basic renderer
-camera = initCamera(new THREE.Vector3(30,15,45)); // Init camera in this position
+//camera = initCamera(new THREE.Vector3(30,15,45)); // Init camera in this position
+camera = initCamera(new THREE.Vector3(27,6,50)); // Init camera in this position
+camera.lookAt(40,0,20);
 light = initDefaultBasicLight(scene);
 orbit = new OrbitControls( camera, renderer.domElement ); // Enable mouse rotation, pan, zoom etc.
 // initDefaultSpotlight(scene, new THREE.Vector3(35, 20, 30)); // Use default light
@@ -40,9 +42,19 @@ let trackballControls = new TrackballControls( camera, renderer.domElement );
 
 let voltasMessage = new SecondaryBox("");
 let tempMessage = new SecondaryBox("");
+let volta1Message = new SecondaryBox("");
+let volta2Message = new SecondaryBox("");
+let volta3Message = new SecondaryBox("");
+let volta4Message = new SecondaryBox("");
+
 
 let pista = new Pista(listaPistas[pistaEscolhida].id, listaPistas[pistaEscolhida].posicoes, listaPistas[pistaEscolhida].checkpoints, scene);
 const carro = new Carro(scene, pista.getInicial(), keyboard);
+
+const distanciaCamera = carro.carro.position.distanceToSquared(camera.position);
+
+const distanciaCameraX = camera.position.x - carro.carro.position.x;
+const distanciaCameraZ = (camera.position.z - carro.carro.position.z);
 
 voltasMessage.changeStyle("rgba(0,0,0,0)", "white", "32px", "ubuntu")
 voltasMessage.box.style.bottom = "92%";
@@ -52,22 +64,73 @@ tempMessage.changeStyle("rgba(0,0,0,0)", "white", "32px", "ubuntu")
 tempMessage.box.style.bottom = "88%";
 tempMessage.box.style.left = "2%";
 
+volta1Message.changeStyle("rgba(0,0,0,0)", "white", "32px", "ubuntu")
+volta1Message.box.style.bottom = "84%";
+volta1Message.box.style.left = "2%";
+
+volta2Message.changeStyle("rgba(0,0,0,0)", "white", "32px", "ubuntu")
+volta2Message.box.style.bottom = "80%";
+volta2Message.box.style.left = "2%";
+
+volta3Message.changeStyle("rgba(0,0,0,0)", "white", "32px", "ubuntu")
+volta3Message.box.style.bottom = "76%";
+volta3Message.box.style.left = "2%";
+
+volta4Message.changeStyle("rgba(0,0,0,0)", "white", "32px", "ubuntu")
+volta4Message.box.style.bottom = "72%";
+volta4Message.box.style.left = "2%";
+
+
 function updateVoltasMessage()
 {
    let str =  "Voltas: " + carro.voltas;
    if(carro.voltas == 4){
-    str = "Voce finalizou a corrida!!!" 
-    pause();
-    carro.velocidade = 0;
-    carro.aceleracao = 0;
+    carro.pause();
+    str = "Voce finalizou a corrida!!!"
+    carro.velocidade = 0.0000;
    }
    voltasMessage.changeMessage(str);
 }
 
 function updateTempMenssage()
 {
-    let str = "Tempo total: " + carro.tempo;
+  let str, str1, str2, str3, str4;
+    switch(carro.tempo.length){
+      case 1:
+        str = "Tempo total: " + carro.tempo[0];
+        break;
+      case 2:
+        str = "Tempo total: " + carro.tempo[0];
+        str1 = "Volta 1: " + carro.tempo[1];
+
+        console.log(carro.tempo[0] - carro.tempo[1]);
+        break;
+      case 3:
+        str = "Tempo total: " + carro.tempo[0];
+        str1 = "Volta 1: " + carro.tempo[1];
+        str2 = "Volta 2: " + carro.tempo[2];
+        break;
+      case 4:
+        str = "Tempo total: " + carro.tempo[0];
+        str1 = "Volta 1: " + carro.tempo[1];
+        str2 = "Volta 2: " + carro.tempo[2];
+        str3 = "Votla 3: " + carro.tempo[3];
+        break;
+      case 5:
+        str = "Tempo total: " + carro.tempo[0];
+        str1 = "Volta 1: " + carro.tempo[1];
+        str2 = "Volta 2: " + carro.tempo[2];
+        str3 = "Volta 3: " + carro.tempo[3];
+        str4 = "Volta 4: " + carro.tempo[4];
+        break;
+        
+
+    }
     tempMessage.changeMessage(str);
+    volta1Message.changeMessage(str1);
+    volta2Message.changeMessage(str2);
+    volta3Message.changeMessage(str3);
+    volta4Message.changeMessage(str4);
 }
 
 const trocaPista = () => {
@@ -92,51 +155,41 @@ const keyboardUpdate = () => {
   } 
 }
 
-const start = () => {
-    carro.cron = setInterval(() => {time()}, carro.temp);
-} 
 
-const pause = () => {
-  clearInterval(carro.cron);
+
+
+
+
+function updateCameraLookAt(){
+  camera.lookAt(carro.carro.position);
 }
-
-const time = ( ) => {
-  carro.ms++;
-
-  if(carro.ms == 60)
-  {
-    carro.ms = 0;
-    carro.ss++;
-    if(carro.ss == 60){
-      carro.ss = 0;
-      carro.mm++;
-      
-    }
+// posição da camera = distancia fixa + posicão do carro
+function updateCameraPosition(){
+  if(distanciaCamera != carro.carro.position.distanceToSquared(camera.position)){
+    updateCameraLookAt();
+    camera.position.set(carro.carro.position.x + distanciaCameraX, camera.position.y, carro.carro.position.z + distanciaCameraZ);
   }
-  
-  let format = (carro.mm < 10 ? '0' + carro.mm : carro.mm) + ':' + (carro.ss < 10 ? '0' + carro.ss : carro.ss) + ':' + (carro.ms < 10 ? '0' + carro.ms : carro.ms);
-            
-  carro.tempo = format;
 }
-start();
+carro.start();
 render();
 
 function render()
 {
   updateVoltasMessage();
   updateTempMenssage();
+  updateCameraPosition();
   keyboardUpdate();
   carro.keyboardUpdate();
   trackballControls.update();
+  trackballControls.target.copy(carro.carro.position);
   carro.penalidade(pista);
-  trackballControls.target.copy(carro.carro.position); // Camera following object
   if(pista.checkpointsVisitados(carro)){
+    carro.tempo.push(carro.tempo[0]);
     carro.voltas += 1;
     carro.checkpointsVisitados = [];
     pista.proximoCheckpoint = 0;
   
   }
-  
   requestAnimationFrame(render);
   renderer.render(scene, camera) // Render scene
   

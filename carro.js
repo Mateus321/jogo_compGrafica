@@ -42,7 +42,7 @@ export class Carro {
         this.ms = 0;
         this.mm = 0;
         this.ss = 0;
-        this.tempo = '';
+        this.tempo = [''];
 
         this.criaChassi = function(){
             let caixa = new THREE.BoxGeometry(10, 2, 5);
@@ -284,9 +284,40 @@ export class Carro {
             this.resetPos();
             this.velocidade = 0;
             this.voltas = 0;
-            this.tempo = "00:00"
+            this.tempo[0] = "00:00"
+            clearInterval(this.cron);
+            this.ms = 0;
+            this.ss = 0;
+            this.mm = 0;
+            this.start();
+        }   
+        
+        this.start = () => {
+            this.cron = setInterval(() => {this.time()}, this.temp);
+        } 
+
+        this.time = ( ) => {
+            this.ms++;
+          
+            if(this.ms == 60)
+            {
+              this.ms = 0;
+              this.ss++;
+              if(this.ss == 60){
+                this.ss = 0;
+                this.mm++;
+                
+              }
+            }
             
-        }    
+            let format = (this.mm < 10 ? '0' + this.mm : this.mm) + ':' + (this.ss < 10 ? '0' + this.ss : this.ss) + ':' + (this.ms < 10 ? '0' + this.ms : this.ms);
+            
+            this.tempo[0] = format;
+          }
+
+          this.pause = () => {
+            clearInterval(this.cron);
+          }
         
 
         this.keyboardUpdate = () => {
