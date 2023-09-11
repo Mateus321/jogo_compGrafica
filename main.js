@@ -86,7 +86,6 @@ const keyboardUpdate = () => {
   } 
 }
 
-
 const start = () => {
     carro.cron = setInterval(() => {time()}, carro.temp);
 } 

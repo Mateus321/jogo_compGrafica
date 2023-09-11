@@ -206,7 +206,7 @@ export class Carro {
         this.acelerar = () =>{
             if(this.velocidade > this.limiteVelocidade){
                 this.velocidade += this.aceleracao;
-                this.velocidade = Number(this.velocidade.toFixed(3));
+                this.velocidade = Number(this.velocidade.toFixed(4));
             }
             this.carro.translateX(this.velocidade);
         }
@@ -214,14 +214,14 @@ export class Carro {
         this.desacelerar = () =>{
             if(this.velocidade < 0){
                 this.velocidade -= this.aceleracao;
-                this.velocidade = Number(this.velocidade.toFixed(3));
+                this.velocidade = Number(this.velocidade.toFixed(4));
                 }
             this.carro.translateX(this.velocidade);
         }
 
         this.freiar = () => {
          this.velocidade -= this.aceleracao*3;
-         this.velocidade = Number(this.velocidade.toFixed(3));
+         this.velocidade = Number(this.velocidade.toFixed(4));
         }
         
 
@@ -230,7 +230,7 @@ export class Carro {
             else{
                 if(this.velocidade <= -this.limiteVelocidade/2.4){
                     this.velocidade -= this.aceleracao;
-                    this.velocidade = Number(this.velocidade.toFixed(3));
+                    this.velocidade = Number(this.velocidade.toFixed(4));
                 }
                 this.carro.translateX(this.velocidade);
             }
@@ -239,7 +239,7 @@ export class Carro {
         this.desacelerarRe = () => {
             if(this.velocidade > 0){
                 this.velocidade += this.aceleracao;
-                this.velocidade = Number(this.velocidade.toFixed(3));
+                this.velocidade = Number(this.velocidade.toFixed(4));
                 }
             this.carro.translateX(this.velocidade);
         }
@@ -283,6 +283,7 @@ export class Carro {
             this.resetPos();
             this.velocidade = 0;
             this.voltas = 0;
+            this.tempo = "00:00"
             
         }    
         
@@ -300,14 +301,16 @@ export class Carro {
             else this.desacelerarRe();
           
             if ( this.keyboard.pressed("left") ){ 
-                if(this.velocidade != 0) this.carro.rotateY(  angle/4 );
+                if(this.velocidade < 0) this.carro.rotateY(  angle/4 );
+                else if(this.velocidade > 0) this.carro.rotateY( -angle/4 );
                 if(calota_frente_direita.rotation.z >= -maxRotation){
                 calota_frente_direita.rotateZ(-angle/2);
                 calota_frente_esquerda.rotateZ(-angle/2);
                 }
             }  
             else if ( this.keyboard.pressed("right") ){
-                if(this.velocidade != 0) this.carro.rotateY( -angle/4 );
+                if(this.velocidade < 0) this.carro.rotateY( -angle/4 );
+                else if(this.velocidade > 0) this.carro.rotateY( angle/4 );
                 if(calota_frente_direita.rotation.z <= maxRotation){
                 calota_frente_direita.rotateZ(angle/2);
                 calota_frente_esquerda.rotateZ(angle/2);
