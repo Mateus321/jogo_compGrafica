@@ -281,8 +281,8 @@ export class Carro {
         }
 
         this.pause = () => {
-            this.velocidade = 0.0;
-            this.aceleracao = 0.0;
+            clearInterval(this.cron);
+            this.aceleracao = 0;
         }
 
         this.resetPos = () => {

@@ -133,9 +133,6 @@ function updateTempMenssage()
     volta4Message.changeMessage(str4);
 }
 
-function resetCronometor(){
-
-}
 
 const trocaPista = () => {
   if(pista){
@@ -152,6 +149,8 @@ const keyboardUpdate = () => {
   if(keyboard.down("1")){
     pistaEscolhida = 0;
     pista = trocaPista();
+    carro.tempo.length = 0;
+    carro.aceleracao = -0.0008;
   }
   if(keyboard.down("2")){
     pistaEscolhida = 1;
