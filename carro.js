@@ -285,6 +285,13 @@ export class Carro {
             this.aceleracao = 0;
         }
 
+        this.stop = () => {
+            clearInterval(this.cron);
+            this.ss = 0;
+            this.ms = 0;
+            this.mm = 0;
+        }
+
         this.resetPos = () => {
             this.carro.position.set(inicial[0], inicial[1]+0.475, inicial[2]);
             this.carro.rotation.x = 0;
