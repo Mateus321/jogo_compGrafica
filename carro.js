@@ -44,6 +44,13 @@ export class Carro {
         this.ss = 0;
         this.tempo = [''];
 
+        this.tempVolta = 1;
+        this.cronVolta;
+        this.msV = 0;
+        this.mmV = 0;
+        this.ssV = 0;
+        this.tempoV = [''];
+
         this.criaChassi = function(){
             let caixa = new THREE.BoxGeometry(10, 2, 5);
             const material_carro = new THREE.MeshPhongMaterial( {color: 0xF0130A });
@@ -273,6 +280,11 @@ export class Carro {
             }
         }
 
+        this.pause = () => {
+            this.velocidade = 0.0;
+            this.aceleracao = 0.0;
+        }
+
         this.resetPos = () => {
             this.carro.position.set(inicial[0], inicial[1]+0.475, inicial[2]);
             this.carro.rotation.x = 0;
@@ -315,9 +327,37 @@ export class Carro {
             this.tempo[0] = format;
           }
 
-          this.pause = () => {
-            clearInterval(this.cron);
+          this.resetVolta = () => {
+            clearInterval(this.cronVolta);
+            this.msV = 0;
+            this.ssV = 0;
+            this.mmV = 0;
+            this.startVolta(); 
+        }   
+        
+        this.startVolta = () => {
+            this.cronVolta = setInterval(() => {this.timeVolta()}, this.tempVolta);
+        } 
+
+        this.timeVolta = ( ) => {
+            this.msV++;
+          
+            if(this.msV == 60)
+            {
+              this.msV = 0;
+              this.ssV++;
+              if(this.ssV == 60){
+                this.ssV = 0;
+                this.mmV++;
+                
+              }
+            }
+            
+            let formatV = (this.mmV < 10 ? '0' + this.mmV : this.mmV) + ':' + (this.ssV < 10 ? '0' + this.ssV : this.ssV) + ':' + (this.msV < 10 ? '0' + this.msV : this.msV);
+            
+            this.tempoV[0] = formatV;
           }
+
         
 
         this.keyboardUpdate = () => {

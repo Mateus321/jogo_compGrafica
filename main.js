@@ -95,33 +95,33 @@ function updateVoltasMessage()
 function updateTempMenssage()
 {
   let str, str1, str2, str3, str4;
+  console.log(carro.tempo.length);
     switch(carro.tempo.length){
       case 1:
         str = "Tempo total: " + carro.tempo[0];
         break;
       case 2:
         str = "Tempo total: " + carro.tempo[0];
-        str1 = "Volta 1: " + carro.tempo[1];
-
-        console.log(carro.tempo[0] - carro.tempo[1]);
+        str1 = "Volta 1: " + carro.tempoV[1];
+        
         break;
       case 3:
         str = "Tempo total: " + carro.tempo[0];
-        str1 = "Volta 1: " + carro.tempo[1];
-        str2 = "Volta 2: " + carro.tempo[2];
+        str1 = "Volta 1: " + carro.tempoV[1];
+        str2 = "Volta 2: " + carro.tempoV[2];
         break;
       case 4:
         str = "Tempo total: " + carro.tempo[0];
-        str1 = "Volta 1: " + carro.tempo[1];
-        str2 = "Volta 2: " + carro.tempo[2];
-        str3 = "Votla 3: " + carro.tempo[3];
+        str1 = "Volta 1: " + carro.tempoV[1];
+        str2 = "Volta 2: " + carro.tempoV[2];
+        str3 = "Votla 3: " + carro.tempoV[3];
         break;
       case 5:
         str = "Tempo total: " + carro.tempo[0];
-        str1 = "Volta 1: " + carro.tempo[1];
-        str2 = "Volta 2: " + carro.tempo[2];
-        str3 = "Volta 3: " + carro.tempo[3];
-        str4 = "Volta 4: " + carro.tempo[4];
+        str1 = "Volta 1: " + carro.tempoV[1];
+        str2 = "Volta 2: " + carro.tempoV[2];
+        str3 = "Volta 3: " + carro.tempoV[3];
+        str4 = "Volta 4: " + carro.tempoV[4];
         break;
         
 
@@ -131,6 +131,10 @@ function updateTempMenssage()
     volta2Message.changeMessage(str2);
     volta3Message.changeMessage(str3);
     volta4Message.changeMessage(str4);
+}
+
+function resetCronometor(){
+
 }
 
 const trocaPista = () => {
@@ -152,6 +156,8 @@ const keyboardUpdate = () => {
   if(keyboard.down("2")){
     pistaEscolhida = 1;
     pista = trocaPista();
+    carro.tempo.length = 0;
+    carro.aceleracao = -0.0008;
   } 
 }
 
@@ -171,6 +177,7 @@ function updateCameraPosition(){
   }
 }
 carro.start();
+carro.startVolta();
 render();
 
 function render()
@@ -185,10 +192,11 @@ function render()
   carro.penalidade(pista);
   if(pista.checkpointsVisitados(carro)){
     carro.tempo.push(carro.tempo[0]);
+    carro.tempoV.push(carro.tempoV[0]);
     carro.voltas += 1;
     carro.checkpointsVisitados = [];
     pista.proximoCheckpoint = 0;
-  
+    carro.resetVolta();
   }
   requestAnimationFrame(render);
   renderer.render(scene, camera) // Render scene
