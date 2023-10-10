@@ -17,7 +17,7 @@ var renderer = initRenderer();    // View function in util/utils
   renderer.setClearColor("rgb(30, 30, 30)");
 var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera.lookAt(0, 0, 0);
-  camera.position.set(5,15,40);
+  camera.position.set(1,4,6);
   camera.up.set( 0, 1, 0 );
 
 var followCamera = false; // Controls if light will follow camera
@@ -34,7 +34,7 @@ scene.add(groundPlane);
 
 // Show axes (parameter is size of each axis)
 var axesHelper = new THREE.AxesHelper( 20 );
-  axesHelper.visible = false;
+  axesHelper.visible = true;
   axesHelper.translateY(0.1);
 scene.add( axesHelper );
 
@@ -73,24 +73,27 @@ let carro = new THREE.Object3D();
 // Create convex object the first time
 updateConvexObject();
 
-buildInterface();
 render();
 
 function generatePoints(numberOfPoints)
 {
-  var points = [];
+  
+  var paraChoqueF = [];
 
-
-    points.push(new THREE.Vector3(3,-2,2));
-    points.push(new THREE.Vector3(3,2,2));
-    points.push(new THREE.Vector3(3,-2,1));
-    points.push(new THREE.Vector3(3, 2,1));
-
+  paraChoqueF.push(new THREE.Vector3(1,0.5,0.8));
+  paraChoqueF.push(new THREE.Vector3(1,-0.5,0.8));
+  paraChoqueF.push(new THREE.Vector3(0.60,0.5,1));
+  paraChoqueF.push(new THREE.Vector3(0.6,-0.5,1));
+  paraChoqueF.push(new THREE.Vector3(1,0.5,0.2));
+  paraChoqueF.push(new THREE.Vector3(1,-0.5,0.2));
+  paraChoqueF.push(new THREE.Vector3(0.6,0.5,0));
+  paraChoqueF.push(new THREE.Vector3(0.6,-0.5,0));
+/*
     points.push(new THREE.Vector3(2.5,-2.5,2));
     points.push(new THREE.Vector3(2.5,-2.5,1));
     points.push(new THREE.Vector3(2.5,2.5,2));
     points.push(new THREE.Vector3(2.5, 2.5,1));
-    /*
+    
     points.push(new THREE.Vector3());
     points.push(new THREE.Vector3());
     points.push(new THREE.Vector3());
@@ -100,13 +103,11 @@ function generatePoints(numberOfPoints)
     points.push(new THREE.Vector3()); 
     points.push(new THREE.Vector3());
     points.push(new THREE.Vector3());*/
-
     
 
-  var material = new THREE.MeshPhongMaterial({color:"rgb(255,255,0)"});
 
-  pointCloud = new THREE.Object3D();
-  points.forEach(function (point) {
+    pointCloud = new THREE.Object3D();
+    paraChoqueF.forEach(function (point) {
     var spGeom = new THREE.SphereGeometry(0.2);
     var spMesh = new THREE.Mesh(spGeom, material);
     spMesh.position.set(point.x, point.y, point.z);
@@ -114,8 +115,8 @@ function generatePoints(numberOfPoints)
     
   });
 
-  scene.add(pointCloud);
-  return points;
+  scene.add(base);
+  return paraChoqueF;
 }
 
 function updateConvexObject( )
@@ -128,10 +129,9 @@ function updateConvexObject( )
 
   // First, create the point vector to be used by the convex hull algorithm
   var localPoints = generatePoints(numPoints);
-  const geometry = new THREE.BoxGeometry(1, 15, 7.5);
-  const materialForro = new THREE.MeshBasicMaterial({color: 0x00ff00});
-  const cube = new THREE.Mesh(geometry, materialForro); 
-
+  const geometry = new THREE.BoxGeometry( 2, 1, 1); 
+  var material = new THREE.MeshPhongMaterial({color:"rgb(255,255,0)"});
+  const base = new THREE.Mesh( geometry, material ); 
   // Then, build the convex geometry with the generated points
   convexGeometry = new ConvexGeometry(localPoints);
 
@@ -144,83 +144,8 @@ function updateConvexObject( )
   // Uncomment to view debug information of the renderer
   //console.log(renderer.info);
 }
-  
-  baseGeometry = new ConvexGeometry()
-function buildInterface()
-{
-  var controls = new function ()
-  {
-    this.viewObject = true;
-    this.viewAxes = false;
-    this.viewPoints = true;
-    this.lightFollowCamera = false;
-    this.color = objColor;
-    this.opacity = objOpacity;
-    this.numPoints = numPoints;
-    this.objectSize = objectSize;
-    this.castShadow = castShadow
+ 
 
-    this.onViewObject = function(){
-      object.visible = this.viewObject;
-      objectVisibility = this.viewObject;
-    };
-    this.onViewPoints = function(){
-      pointCloud.visible = this.viewPoints;
-      pointCloudVisibility = this.viewPoints;
-    };
-    this.onViewAxes = function(){
-      axesHelper.visible = this.viewAxes;
-    };
-    this.updateColor = function(){
-      objectMaterial.color.set(this.color);
-    };
-    this.updateOpacity = function(){
-      objectMaterial.opacity = this.opacity;
-    };
-    this.updateLight = function(){
-      followCamera = this.lightFollowCamera;
-    };
-    this.onCastShadow = function(){
-      object.castShadow = this.castShadow;
-      pointCloud.castShadow = this.castShadow;
-      castShadow = this.castShadow;
-    };
-    this.rebuildGeometry = function(){
-      numPoints = this.numPoints;
-      objectSize = this.objectSize;
-      updateConvexObject();
-    };
-  };
-
-  var gui = new GUI();
-  gui.add(controls, 'viewObject', true)
-    .name("View Object")
-    .onChange(function(e) { controls.onViewObject() });
-  gui.add(controls, 'viewPoints', false)
-    .name("View Points")
-    .onChange(function(e) { controls.onViewPoints() });
-  gui.add(controls, 'viewAxes', false)
-    .name("View Axes")
-    .onChange(function(e) { controls.onViewAxes() });
-  gui.add(controls, 'lightFollowCamera', false)
-    .name("LightFollowCam")
-    .onChange(function(e) { controls.updateLight() });
-  gui.add(controls, 'castShadow', castShadow)
-    .name("Shadows")
-    .onChange(function(e) { controls.onCastShadow() });
-  gui.addColor(controls, 'color')
-    .name("Object Color")
-    .onChange(function(e) { controls.updateColor();});
-  gui.add(controls, 'opacity', 0, 1)
-    .name("Opacity")
-    .onChange(function(e) { controls.updateOpacity();});
-  gui.add(controls, 'objectSize', 2, 20)
-    .name("Object Max Size")
-    .onChange(function(e) { controls.rebuildGeometry();});
-  gui.add(controls, 'numPoints', 10, 50)
-    .name("Number Of Points")
-    .onChange(function(e) { controls.rebuildGeometry();});
-}
 
 function render()
 {

@@ -11,6 +11,7 @@ import {initRenderer,
         onWindowResize, 
         createGroundPlaneXZ} from "../libs/util/util.js";
 import { ConvexGeometry } from '../build/jsm/geometries/ConvexGeometry.js';
+import { BoxGeometry } from '../build/three.module.js';
 
 // Listen window size changes
 
@@ -36,6 +37,9 @@ export class Carro {
         this.scene = scene
         this.inicial = inicial;
         this.keyboard = keyboard;
+
+        this.materialCarro = new THREE.MeshPhongMaterial( {color: 0xF0130A });
+
         this.checkpointsVisitados = [];
         this.voltas = 0;
         this.temp = 1;
@@ -53,14 +57,55 @@ export class Carro {
         this.tempoV = [''];
 
 
-
         this.carro = new THREE.Object3D();
 
-        this.criaBase = (pontos) => {
-            const baseGeometry = new ConvexGeometry(pontos);
-            const baseMaterial = new THREE.MeshPhongMaterial( {color: 0xF0130A });
-            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+        this.criaBase = function(){
+            const baseGeometry = new BoxGeometry(2,1 ,1);
+            const base = new THREE.Mesh(baseGeometry, this.materialCarro);
             return base;
+        }
+
+        this.paraChoqueFrente = function(){
+            var paraChoqueF = []
+
+            paraChoqueF.push(new THREE.Vector3(1,0.5,0.8));
+            paraChoqueF.push(new THREE.Vector3(1,-0.5,0.8));
+            paraChoqueF.push(new THREE.Vector3(0.8,1,1));
+            paraChoqueF.push(new THREE.Vector3(0.8,-1,1));
+            paraChoqueF.push(new THREE.Vector3(1,0.5,0.2));
+            paraChoqueF.push(new THREE.Vector3(1,-0.5,0.2));
+            paraChoqueF.push(new THREE.Vector3(0.8,1,0));
+            paraChoqueF.push(new THREE.Vector3(0.8,-1,0));
+            
+            return paraChoqueF;
+        }
+
+        this.paraChoqueTras = function(){
+            var paraChoqueT = []
+
+            paraChoqueT.push(new THREE.Vector3(-1,1,1));
+            paraChoqueT.push(new THREE.Vector3(-1,-1,1));
+            paraChoqueT.push(new THREE.Vector3(-0.6,1,1));
+            paraChoqueT.push(new THREE.Vector3(-0.6,1,0));
+            paraChoqueT.push(new THREE.Vector3(-0.6,1,0));
+            paraChoqueT.push(new THREE.Vector3(-0.6,-1,0));
+
+            return paraChoqueT;
+        }
+    /*
+        A=(2,1,1)
+        (-2,1,1)
+        C=(2,-1,1)
+        D=(-2,-1,1)
+        E=(0.5,1,1.5)
+        F=(0.5,-1,1.5)
+    */
+
+
+
+
+        this.updateConvexObject = function(){
+            
         }
 
         this.carro.position.set(inicial[0], inicial[1]+0.475, inicial[2]);
