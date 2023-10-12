@@ -2,6 +2,8 @@ import * as THREE from  'three';
 import { OrbitControls } from '../build/jsm/controls/OrbitControls.js';
 import { Pista } from './pistaarray.js';
 
+
+
 import {initRenderer, 
         initCamera,
         initDefaultBasicLight,
@@ -14,6 +16,14 @@ import { ConvexGeometry } from '../build/jsm/geometries/ConvexGeometry.js';
 import { BoxGeometry } from '../build/three.module.js';
 
 // Listen window size changes
+let scene, renderer, camera, material, light, orbit; // Initial variables
+scene = new THREE.Scene();    // Create main scene
+renderer = initRenderer();    // Init a basic renderer
+camera = initCamera(new THREE.Vector3(0, 15, 30)); // Init camera in this position
+material = setDefaultMaterial(); // create a basic material
+light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
+orbit = new OrbitControls( camera, renderer.domElement ); // Enable mouse rotation, pan, zoom etc.
+
 
 // Use to scale the cube
 var scale = 1.0;
@@ -28,7 +38,17 @@ var scale = 1.0;
 
 // create the ground plane
 // scene.add(plane);
+var estruturaMaterial = new THREE.MeshPhongMaterial({
+    color: 0xD9F7DB,
+  //opacity: objOpacity,
+  transparent: false
+});
 
+var vidroMaterial = new THREE.MeshPhongMaterial({
+    color: 0x656465,
+ // opacity: objOpacity,
+  transparent: true
+});
 
 
 
@@ -92,19 +112,29 @@ export class Carro {
 
             return paraChoqueT;
         }
-    /*
-        A=(2,1,1)
-        (-2,1,1)
-        C=(2,-1,1)
-        D=(-2,-1,1)
-        E=(0.5,1,1.5)
-        F=(0.5,-1,1.5)
-    */
+
+    
+    this.teto = function(){
+        var tetoC = []
+        
+        tetoC.push(new THREE.Vector3(2,1,1));
+        tetoC.push(new THREE.Vector3(-2,1,1));
+        tetoC.push(new THREE.Vector3(2,-1,1));
+        tetoC.push(new THREE.Vector3(-2,-1,1));
+        tetoC.push(new THREE.Vector3(0.5,1,1.5));
+        tetoC.push(new THREE.Vector3(0.5,-1,1.5));
+    }
 
 
 
+        this.updateTeto = function(){
+            var localPoints = this.teto();
 
-        this.updateConvexObject = function(){
+            convexGeometry = new ConvexGeometry(localPoints);
+
+            object = new THREE.Mesh(convexGeometry, estruturaMaterial);
+
+            scene.add(object);
             
         }
 
@@ -275,7 +305,7 @@ export class Carro {
 
         
 
-        this.keyboardUpdate = () => {
+  /*      this.keyboardUpdate = () => {
 
             let angle = THREE.MathUtils.degToRad(5);
             let maxRotation = Math.PI / 6;
@@ -313,7 +343,7 @@ export class Carro {
                     }
                 }
             }
-          }   
+          }   */
     }
 
 

@@ -1,5 +1,5 @@
 import * as THREE from  'three';
-import { Carro } from './carro.js';
+import { Carro } from './cybertruckobj.js';
 import {Pista, listaPistas} from './pistaarray.js';
 import {TrackballControls} from '../build/jsm/controls/TrackballControls.js';
 import { OrbitControls } from '../build/jsm/controls/OrbitControls.js';
@@ -172,7 +172,7 @@ const toggleInspec = () => {
   inspec = !inspec;
 }
 
-const keyboardUpdate = () => {
+/*const keyboardUpdate = () => {
   keyboard.update();
   if(keyboard.down("space")) toggleInspec();
   if(keyboard.down("1")){
@@ -188,7 +188,7 @@ const keyboardUpdate = () => {
     carro.aceleracao = -0.0008;
   } 
 }
-
+*/
 
 
 
@@ -210,13 +210,13 @@ render();
 
 function render()
 {
-  
-  keyboardUpdate();
+
+  //keyboardUpdate();
   requestAnimationFrame(render);
   if(!inspec){
     trackballControls.update();
     trackballControls.target.copy(carro.carro.position);
-    carro.keyboardUpdate();
+    //carro.keyboardUpdate();
     updateVoltasMessage();
     updateTempMenssage();
     updateCameraPosition();
