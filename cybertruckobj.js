@@ -13,23 +13,20 @@ import {initRenderer,
         onWindowResize, 
         createGroundPlaneXZ} from "../libs/util/util.js";
 import { ConvexGeometry } from '../build/jsm/geometries/ConvexGeometry.js';
-import { BoxGeometry } from '../build/three.module.js';
+import { BoxGeometry, Scene } from '../build/three.module.js';
 
 // Listen window size changes
-let scene, renderer, camera, material, light, orbit; // Initial variables
-scene = new THREE.Scene();    // Create main scene
-renderer = initRenderer();    // Init a basic renderer
-camera = initCamera(new THREE.Vector3(0, 15, 30)); // Init camera in this position
-material = setDefaultMaterial(); // create a basic material
-light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
-orbit = new OrbitControls( camera, renderer.domElement ); // Enable mouse rotation, pan, zoom etc.
 
 
 // Use to scale the cube
 var scale = 1.0;
 
 // Show text information onscreen
-
+var teto = null;
+var paraChoquef = null;
+var paraChoquet = null;
+let castShadow = true;
+let objectVisibility = true;
 
 // To use the keyboard
 
@@ -53,10 +50,11 @@ var vidroMaterial = new THREE.MeshPhongMaterial({
 
 
 export class Carro {
-    constructor(scene, inicial, keyboard) {
-        this.scene = scene
-        this.inicial = inicial;
-        this.keyboard = keyboard;
+    constructor(scene, camera) {
+        this.scene = scene;
+        this.camera = camera;
+        //this.inicial = inicial;
+        //this.keyboard = keyboard;
 
         this.materialCarro = new THREE.MeshPhongMaterial( {color: 0xF0130A });
 
@@ -80,8 +78,10 @@ export class Carro {
         this.carro = new THREE.Object3D();
 
         this.criaBase = function(){
-            const baseGeometry = new BoxGeometry(2,1 ,1);
-            const base = new THREE.Mesh(baseGeometry, this.materialCarro);
+            const baseGeometry = new BoxGeometry(4, 1, 2);
+            const base = new THREE.Mesh(baseGeometry, estruturaMaterial);
+            base.castShadow = castShadow;
+            base.objectVisibility = objectVisibility;
             return base;
         }
 
@@ -113,6 +113,33 @@ export class Carro {
             return paraChoqueT;
         }
 
+        this.criarEixo = function (){
+            const eixosC = new THREE.CylinderGeometry( 0.5, 0.5, 6, 24 );
+            const material_eixos = new THREE.MeshPhongMaterial( { color: 0xCCCCCC } ); 
+            const eixo = new THREE.Mesh(eixosC, material_eixos);
+            return eixo;
+        }
+
+        this.criarEsfera = () => {
+            const geometria_esfera = new THREE.SphereGeometry(0.6, 32, 16);
+            const material_esfera = new THREE.MeshPhongMaterial ( {color: 0xE3EFDF })
+            const esfera = new THREE.Mesh(geometria_esfera, material_esfera);
+            return esfera;
+        }
+
+        this.criarCalota = function (){
+            const calotaS = new THREE.CylinderGeometry(0.5, 0.1, 0.2, 24); 
+            const material_calota = new THREE.MeshPhongMaterial({color: 0xE3EFDF });
+            const calota = new THREE.Mesh(calotaS, material_calota);
+            return calota;
+        }
+        this.criarPneu = function(){
+            const rodas = new THREE.TorusGeometry( 0.8, 0.4, 16, 50 ); 
+            const material_rodas = new THREE.MeshPhongMaterial( { color: 0x000 } );
+            const roda = new THREE.Mesh(rodas, material_rodas);
+            return roda;
+        }
+
     
     this.teto = function(){
         var tetoC = []
@@ -127,19 +154,102 @@ export class Carro {
 
 
 
-        this.updateTeto = function(){
-            var localPoints = this.teto();
+        this.updateConvexObject = function(){
+            
+            let base = this.criaBase();
 
-            convexGeometry = new ConvexGeometry(localPoints);
+            scene.add(base);
+            
+            var tetoP = this.teto();
 
-            object = new THREE.Mesh(convexGeometry, estruturaMaterial);
+            let convexTeto = new ConvexGeometry(tetoP);
 
-            scene.add(object);
+            let teto = new THREE.Mesh(convexTeto, estruturaMaterial);
+            teto.castShadow = castShadow;
+            teto.visible = objectVisibility;
+            teto.translateY(2);
+            base.add(teto);
+
+            var parachoqueFP = this.paraChoqueFrente();
+
+            let convexParaF = new ConvexGeometry(parachoqueFP);
+            
+            paraChoquef = new THREE.Mesh(convexParaF, estruturaMaterial);
+            paraChoquef.castShadow = castShadow;
+            paraChoquef.visible = objectVisibility;
+            paraChoquef.rotateX(Math.PI/2);
+            paraChoquef.translateX(1.2);
+            paraChoquef.translateZ(-0.5);
+            base.add(paraChoquef);
+
+            const eixo_frente = this.criarEixo();
+            base.add(eixo_frente);
+
+            const eixo_tras = this.criarEixo();
+            base.add(eixo_tras);
+
+            eixo_frente.rotateX(THREE.MathUtils.degToRad(90));
+            eixo_frente.translateZ(1);
+            eixo_frente.translateX(-4);
+
+            eixo_tras.rotateX(THREE.MathUtils.degToRad(90));
+            eixo_tras.translateZ(1);
+            eixo_tras.translateX(4);
+
+            const calota_frente_direita = this.criarCalota();
+            eixo_frente.add(calota_frente_direita);
+            calota_frente_direita.translateY(-3);
+
+            const calota_frente_esquerda = this.criarCalota();
+            eixo_frente.add(calota_frente_esquerda);
+            calota_frente_esquerda.translateY(3);
+
+            const calota_tras_direita = this.criarCalota();
+            eixo_tras.add(calota_tras_direita);
+        calota_tras_direita.translateY(-3);
+
+        const calota_tras_esquerda = this.criarCalota();
+        eixo_tras.add(calota_tras_esquerda);
+        calota_tras_esquerda.translateY(3);
+
+        const esfera_frente_direita = this.criarEsfera();
+        eixo_frente.add(esfera_frente_direita);
+        esfera_frente_direita.translateY(3);
+
+        const esfera_frente_esquerda = this.criarEsfera();
+        eixo_frente.add(esfera_frente_esquerda);
+        esfera_frente_esquerda.translateY(-3);
+
+        const esfera_tras_direita = this.criarEsfera();
+        eixo_tras.add(esfera_tras_direita);
+        esfera_tras_direita.translateY(3);
+
+        const esfera_tras_esquerda = this.criarEsfera();
+        eixo_tras.add(esfera_tras_esquerda);
+        esfera_tras_esquerda.translateY(-3);
+
+
+        const pneu_frente_direita = this.criarPneu();
+        calota_frente_direita.add(pneu_frente_direita);
+        pneu_frente_direita.rotateX(THREE.MathUtils.degToRad(90));
+
+        const pneu_frente_esquerda = this.criarPneu();
+        calota_frente_esquerda.add(pneu_frente_esquerda);
+        pneu_frente_esquerda.rotateX(THREE.MathUtils.degToRad(90));
+
+        const pneu_tras_direita = this.criarPneu();
+        calota_tras_direita.add(pneu_tras_direita);
+        pneu_tras_direita.rotateX(THREE.MathUtils.degToRad(90));
+
+        const pneu_tras_esquerda = this.criarPneu();
+        calota_tras_esquerda.add(pneu_tras_esquerda);
+        pneu_tras_esquerda.rotateX(THREE.MathUtils.degToRad(90));
+
             
         }
 
-        this.carro.position.set(inicial[0], inicial[1]+0.475, inicial[2]);
-        this.carro.scale.set(0.15,0.15,0.15);
+        //this.carro.position.set(inicial[0], inicial[1]+0.475, inicial[2]);
+
 
         this.scene.add(this.carro);
 
@@ -230,12 +340,12 @@ export class Carro {
             this.mm = 0;
         }
 
-        this.resetPos = () => {
+        /*this.resetPos = () => {
             this.carro.position.set(inicial[0], inicial[1]+0.475, inicial[2]);
             this.carro.rotation.x = 0;
             this.carro.rotation.y = 0;
             this.carro.rotation.z = 0;
-        }
+        }*/
 
         this.reset = () => {
             this.resetPos();
@@ -346,10 +456,25 @@ export class Carro {
           }   */
     }
 
-
+    
 
 }
-        
+let scene, renderer, camera, material, light, orbit; // Initial variables
+scene = new THREE.Scene();    // Create main scene
+renderer = initRenderer();    // Init a basic renderer
+camera = initCamera(new THREE.Vector3(0, 10, 10)); // Init camera in this position
+material = setDefaultMaterial(); // create a basic material
+light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
+orbit = new OrbitControls( camera, renderer.domElement ); // Enable mouse rotation, pan, zoom etc.
+let carro = new Carro(scene, camera)
+render();
+    function render()
+    {
+        renderer.render(carro.scene, carro.camera);
+        requestAnimationFrame(render);
+        carro.updateConvexObject();
+
+    }   
 
 
 
