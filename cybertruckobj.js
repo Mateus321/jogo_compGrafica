@@ -78,7 +78,7 @@ export class Carro {
         this.carro = new THREE.Object3D();
 
         this.criaBase = function(){
-            const baseGeometry = new BoxGeometry(4, 1, 2);
+            const baseGeometry = new BoxGeometry(12, 2.6, 5.5);
             const base = new THREE.Mesh(baseGeometry, estruturaMaterial);
             base.castShadow = castShadow;
             base.objectVisibility = objectVisibility;
@@ -114,28 +114,30 @@ export class Carro {
         }
 
         this.criarEixo = function (){
-            const eixosC = new THREE.CylinderGeometry( 0.5, 0.5, 6, 24 );
+            const eixosC = new THREE.CylinderGeometry( 0.2, 0.2, 6, 24 );
             const material_eixos = new THREE.MeshPhongMaterial( { color: 0xCCCCCC } ); 
             const eixo = new THREE.Mesh(eixosC, material_eixos);
             return eixo;
         }
 
         this.criarEsfera = () => {
-            const geometria_esfera = new THREE.SphereGeometry(0.6, 32, 16);
-            const material_esfera = new THREE.MeshPhongMaterial ( {color: 0xE3EFDF })
-            const esfera = new THREE.Mesh(geometria_esfera, material_esfera);
+            const geometria_esfera= new THREE.CylinderGeometry(0.8, 0.8, 0.6, 8); 
+            const material_esfera= new THREE.MeshPhongMaterial({color: 0xE3EFDF });
+            const esfera = new THREE.Mesh(geometria_esfera,  material_esfera);
             return esfera;
         }
 
         this.criarCalota = function (){
-            const calotaS = new THREE.CylinderGeometry(0.5, 0.1, 0.2, 24); 
-            const material_calota = new THREE.MeshPhongMaterial({color: 0xE3EFDF });
-            const calota = new THREE.Mesh(calotaS, material_calota);
+            const calotaS = new THREE.SphereGeometry(0.1, 32, 16);
+            const material_calota = new THREE.MeshPhongMaterial ( {color: 0xE3EFDF })
+            const calota= new THREE.Mesh( calotaS, material_calota);
             return calota;
+
+           
         }
         this.criarPneu = function(){
-            const rodas = new THREE.TorusGeometry( 0.8, 0.4, 16, 50 ); 
-            const material_rodas = new THREE.MeshPhongMaterial( { color: 0x000 } );
+            const rodas = new THREE.TorusGeometry( 0.8, 0.3, 16, 50 ); 
+            const material_rodas = new THREE.MeshPhongMaterial( { color: 0x670 } );
             const roda = new THREE.Mesh(rodas, material_rodas);
             return roda;
         }
@@ -194,7 +196,7 @@ export class Carro {
 
             eixo_tras.rotateX(THREE.MathUtils.degToRad(90));
             eixo_tras.translateZ(1);
-            eixo_tras.translateX(4);
+            eixo_tras.translateX(3);
 
             const calota_frente_direita = this.criarCalota();
             eixo_frente.add(calota_frente_direita);
@@ -206,7 +208,7 @@ export class Carro {
 
             const calota_tras_direita = this.criarCalota();
             eixo_tras.add(calota_tras_direita);
-        calota_tras_direita.translateY(-3);
+            calota_tras_direita.translateY(-3);
 
         const calota_tras_esquerda = this.criarCalota();
         eixo_tras.add(calota_tras_esquerda);
