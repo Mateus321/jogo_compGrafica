@@ -187,6 +187,18 @@ const keyboardUpdate = () => {
     carro.tempo.length = 0;
     carro.aceleracao = -0.0008;
   } 
+  if(keyboard.down("3")){
+    pistaEscolhida = 2;
+    pista = trocaPista();
+    carro.tempo.length = 0;
+    carro.aceleracao = -0.0008;
+  } 
+  if(keyboard.down("4")){
+    pistaEscolhida = 3;
+    pista = trocaPista();
+    carro.tempo.length = 0;
+    carro.aceleracao = -0.0008;
+  } 
 }
 
 
