@@ -32,7 +32,7 @@ let vcLookAt = new THREE.Vector3(20.0,0.0,20.0);
 let vcPosition = new THREE.Vector3(20,110.0,20.0);
 let vcUpVec = new THREE.Vector3(0.0,1.0,0.0);
 
-let virtualCamera = new THREE.PerspectiveCamera(50.0,1.3,1.0,110.0);
+let virtualCamera = new THREE.PerspectiveCamera(50.0,1.3,1.0,111.0);
 virtualCamera.position.copy(vcPosition);
 virtualCamera.lookAt(vcLookAt);
 virtualCamera.up.copy(vcUpVec);
@@ -45,14 +45,14 @@ let pistaEscolhida = 0;
 window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
 
 // Show axes (parameter is size of each axis)
-let plane = createGroundPlaneXZ(200, 200);
+let plane = createGroundPlaneXZ(250, 250);
 scene.add(plane);
 
 
 var keyboard = new KeyboardState();
 
 // let trackballControls = new TrackballControls( camera, renderer.domElement );
-let inspecTrackballControls = new TrackballControls( inspecCamera, renderer.domElement );
+// let inspecTrackballControls = new TrackballControls( inspecCamera, renderer.domElement );
 
 
 let voltasMessage = new SecondaryBox("");
@@ -154,6 +154,7 @@ const trocaPista = () => {
   }
   const novaPista = new Pista(listaPistas[pistaEscolhida].id, listaPistas[pistaEscolhida].posicoes, listaPistas[pistaEscolhida].checkpoints, scene);
   let inicial = novaPista.getInicial();
+  carro.inicial = inicial;
   carro.reset();
   return novaPista;
 }
@@ -186,24 +187,37 @@ const keyboardUpdate = () => {
   keyboard.update();
   if(keyboard.down("space")) toggleInspec();
   if(keyboard.down("1")){
+    if(pistaEscolhida != 0){
+      virtualCamera.position.set(20,70,20);
+    }
     pistaEscolhida = 0;
     pista = trocaPista();
     carro.tempo.length = 0;
     carro.aceleracao = -0.0008;
   }
   if(keyboard.down("2")){
+    if(pistaEscolhida != 1){
+      virtualCamera.position.set(20,70,20);
+    }
     pistaEscolhida = 1;
     pista = trocaPista();
     carro.tempo.length = 0;
     carro.aceleracao = -0.0008;
   } 
   if(keyboard.down("3")){
+    if(pistaEscolhida != 2){
+      virtualCamera.position.set(45,110,40);
+    }
     pistaEscolhida = 2;
     pista = trocaPista();
+    carro.carro.rotation.y = -Math.PI/2;
     carro.tempo.length = 0;
     carro.aceleracao = -0.0008;
   } 
   if(keyboard.down("4")){
+    if(pistaEscolhida != 3){
+      virtualCamera.position.set(45,90,45);
+    }
     pistaEscolhida = 3;
     pista = trocaPista();
     carro.tempo.length = 0;
