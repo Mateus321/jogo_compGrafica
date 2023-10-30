@@ -12,6 +12,7 @@ import {initRenderer,
         InfoBox,
         onWindowResize,
         createGroundPlaneXZ} from "../libs/util/util.js";
+import { Vector3 } from '../build/three.module.js';
 
 let inspec = false;
 
@@ -33,6 +34,9 @@ camera.lookAt(40,0,20);
 let lightColor = "rgb(255,255,255)";
 let lightPosition = new THREE.Vector3(45.0, 50.0, 50.0);
 let dirLight = new THREE.DirectionalLight(lightColor);
+
+let camera3rd = initCamera(new THREE.Vector3 (32, 4 ,40));
+camera3rd.lookAt(20,0,40);
 
 dirLight.position.copy(lightPosition)
 dirLight.castShadow = true;
@@ -67,6 +71,7 @@ virtualCamera.lookAt(vcLookAt);
 virtualCamera.up.copy(vcUpVec);
 
 let pistaEscolhida = 0;
+let camMode = 0; // camera 0 - normal, camera 1 - 3a pessoa, camera 2 - inspeção
 
 
 
@@ -99,6 +104,11 @@ const distanciaCamera = carro.carro.position.distanceToSquared(camera.position);
 
 const distanciaCameraX = camera.position.x - carro.carro.position.x;
 const distanciaCameraZ = (camera.position.z - carro.carro.position.z);
+
+const distanciaCamera3rd = carro.carro.position.distanceToSquared(camera3rd.position);
+
+const distanciaCamera3rdX = camera3rd.position.x - carro.carro.position.x;
+const distanciaCamera3rdZ = camera3rd.position.z - carro.carro.position.z;
 
 const distanciaLuzX = dirLight.position.x - carro.carro.position.x;
 const distanciaLuzZ = dirLight.position.z - carro.carro.position.z;
@@ -199,25 +209,37 @@ const hideMessages =  () => {
   volta4Message.hide();
 }
 
-const toggleInspec = () => {
-  if(!inspec){
-  carro.carro.scale.set(10,10,10);
-  scene.remove(plane);
-  carro.reset();
-  pista.removePista();
-  hideMessages();
+const toggleCamChange = () => {
+  if(camMode == 2){
+    camMode = 0;
   }else{
+    camMode += 1;
+  }
+  console.log(carro.carro.position);
+  console.log(camMode);
+  switch(camMode){
+    case 0:
     carro.carro.scale.set(0.15,0.15,0.15);
     scene.add(plane);
-    pista = new Pista(listaPistas[pistaEscolhida].id, listaPistas[pistaEscolhida].posicoes, listaPistas[pistaEscolhida].checkpoints, scene);
+    pista = new Pista(listaPistas[pistaEscolhida].id, 
+      listaPistas[pistaEscolhida].posicoes, listaPistas[pistaEscolhida].checkpoints, scene);
+      break;
+    case 2:
+      carro.carro.scale.set(10,10,10);
+      scene.remove(plane);
+      carro.reset();
+      pista.removePista();
+      hideMessages();
+      break;
   }
-  inspec = !inspec;
+ 
 }
+
 
 
 const keyboardUpdate = () => {
   keyboard.update();
-  if(keyboard.down("space")) toggleInspec();
+  if(keyboard.down("space")) toggleCamChange();
   if(keyboard.down("1")){
     if(pistaEscolhida != 0){
       virtualCamera.position.set(20,70,20);
@@ -263,14 +285,26 @@ function updateCameraLookAt(){
 }
 // posição da camera = distancia fixa + posicão do carro
 function updateCameraPosition(){
-  if(distanciaCamera != carro.carro.position.distanceToSquared(camera.position)){
     camera.position.set(carro.carro.position.x + distanciaCameraX, camera.position.y, carro.carro.position.z + distanciaCameraZ);
     dirLight.position.set(carro.carro.position.x + distanciaLuzX, dirLight.position.y, carro.carro.position.z + distanciaLuzZ);
-  }else{
     updateCameraLookAt();
-  }
-  
 }
+
+function updateCamera3rdLookAt(){
+  camera3rd.lookAt(carro.carro.position);
+}
+
+function updateCamera3rdPosition(){
+  let matrix = new THREE.Matrix4();
+  matrix.extractRotation(carro.carro.matrix);
+  let offset = new THREE.Vector3 (distanciaCamera3rdX, 4 ,distanciaCamera3rdZ);
+  offset.applyMatrix4(matrix);
+  let camera3rdPosition = carro.carro.position.clone().add(offset);
+  camera3rd.position.set(camera3rdPosition.x, camera3rd.position.y, camera3rdPosition.z);
+  dirLight.position.set(carro.carro.position.x + distanciaLuzX, dirLight.position.y, carro.carro.position.z + distanciaLuzZ);
+  updateCamera3rdLookAt();
+}
+
 carro.start();
 carro.startVolta();
 render();
@@ -299,34 +333,85 @@ function vcRender(){
   renderer.render(scene, virtualCamera);
 }
 
+function vcRender3rd(){
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+
+  renderer.setViewport(0, 0, width, height); // Reset viewport    
+  renderer.setScissorTest(false); // Disable scissor to paint the entire window
+  renderer.setClearColor("rgb(80, 70, 170)");
+  updateCamera3rdPosition();
+  renderer.clear();   // Clean the window
+  renderer.render(scene, camera3rd);
+
+  // If autoClear if false, clear depth buffer to avoid unwanted overlays
+  if (!renderer.autoClear) renderer.clearDepth()  // Clean the small viewport 
+  
+  let offset = 10;
+  let vcWidth = (width/3 > 400) ? 400 : width / 3;
+  let vcHeight =  vcWidth * 0.75;
+  renderer.setViewport(offset, height - vcHeight - offset, vcWidth, vcHeight);
+  renderer.setScissor(offset, height - vcHeight - offset, vcWidth-1, vcHeight -1);
+  renderer.setScissorTest(true);
+  renderer.setClearColor("rgb(60,50,150)");
+  renderer.render(scene, virtualCamera);
+}
+
+function vcRenderInspec(){
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+
+  renderer.setViewport(0, 0, width, height); // Reset viewport    
+  renderer.setScissorTest(false); // Disable scissor to paint the entire window
+  renderer.setClearColor("rgb(80, 70, 170)");
+  renderer.clear();   // Clean the window
+  renderer.render(scene, inspecCamera);
+}
+
 function render()
 {
   
   keyboardUpdate();
   
   requestAnimationFrame(render);
-  if(!inspec){
+  switch(camMode){
     // trackballControls.update();
     // trackballControls.target.copy(carro.carro.position);
-    
-    carro.keyboardUpdate();
-    updateVoltasMessage();
-    updateTempMenssage();
-    carro.penalidade(pista);
-    if(pista.checkpointsVisitados(carro)){
-      
-      carro.tempo.push(carro.tempo[0]);
-      carro.tempoV.push(carro.tempoV[0]);
-      carro.voltas += 1;
-      carro.checkpointsVisitados = [];
-      pista.proximoCheckpoint = 0;
-      carro.resetVolta();
+    case 0:
+      carro.keyboardUpdate();
+      updateVoltasMessage();
+      updateTempMenssage();
+      carro.penalidade(pista);
+      if(pista.checkpointsVisitados(carro)){
+        
+        carro.tempo.push(carro.tempo[0]);
+        carro.tempoV.push(carro.tempoV[0]);
+        carro.voltas += 1;
+        carro.checkpointsVisitados = [];
+        pista.proximoCheckpoint = 0;
+        carro.resetVolta();
+      }
+      vcRender();
+    break;
+    case 1:
+      carro.keyboardUpdate();
+      updateVoltasMessage();
+      updateTempMenssage();
+      carro.penalidade(pista);
+      if(pista.checkpointsVisitados(carro)){
+        
+        carro.tempo.push(carro.tempo[0]);
+        carro.tempoV.push(carro.tempoV[0]);
+        carro.voltas += 1;
+        carro.checkpointsVisitados = [];
+        pista.proximoCheckpoint = 0;
+        carro.resetVolta();
+      }
+      vcRender3rd();
+      break;
+    case 2:
+      vcRenderInspec();
+      break;
     }
-    vcRender();
-  }else{
-    renderer.render(scene, inspecCamera);
-    console.log(inspecCamera);
-    // inspecTrackballControls.update();
-  }
 }// Render scene
   
