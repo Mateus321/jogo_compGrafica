@@ -182,6 +182,7 @@ export class Pista {
         }else{
           let bloco = new THREE.Mesh(cubeGeometry, material);
           bloco.position.set(element[0],element[1],element[2]);
+          bloco.receiveShadow = true;
           this.pista.add(bloco);
         }
       });
