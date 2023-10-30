@@ -19,7 +19,7 @@ let scene, renderer, camera, material, light, orbit; // Initial variables
 scene = new THREE.Scene();    // Create main scene
 renderer = initRenderer();    // Init a basic renderer
 //camera = initCamera(new THREE.Vector3(30,15,45)); // Init camera in this position
-camera = initCamera(new THREE.Vector3(27,6,50)); // Init camera in this position
+camera = initCamera(new THREE.Vector3(30,7,50)); // Init camera in this position
 camera.lookAt(40,0,20);
 light = initDefaultBasicLight(scene); // Enable mouse rotation, pan, zoom etc.
 // initDefaultSpotlight(scene, new THREE.Vector3(35, 20, 30)); // Use default light
@@ -27,6 +27,15 @@ light = initDefaultBasicLight(scene); // Enable mouse rotation, pan, zoom etc.
 let inspecCamera = initCamera(new THREE.Vector3(-45,20,140));
 //inspecCamera.lookAt(150,100,200);
 orbit = new OrbitControls( inspecCamera, renderer.domElement );
+
+let vcLookAt = new THREE.Vector3(20.0,0.0,20.0);
+let vcPosition = new THREE.Vector3(20,110.0,20.0);
+let vcUpVec = new THREE.Vector3(0.0,1.0,0.0);
+
+let virtualCamera = new THREE.PerspectiveCamera(50.0,1.3,1.0,111.0);
+virtualCamera.position.copy(vcPosition);
+virtualCamera.lookAt(vcLookAt);
+virtualCamera.up.copy(vcUpVec);
 
 let pistaEscolhida = 0;
 
@@ -36,14 +45,14 @@ let pistaEscolhida = 0;
 window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
 
 // Show axes (parameter is size of each axis)
-let plane = createGroundPlaneXZ(200, 200);
+let plane = createGroundPlaneXZ(250, 250);
 scene.add(plane);
 
 
 var keyboard = new KeyboardState();
 
-let trackballControls = new TrackballControls( camera, renderer.domElement );
-let inspecTrackballControls = new TrackballControls( inspecCamera, renderer.domElement );
+// let trackballControls = new TrackballControls( camera, renderer.domElement );
+// let inspecTrackballControls = new TrackballControls( inspecCamera, renderer.domElement );
 
 
 let voltasMessage = new SecondaryBox("");
@@ -145,6 +154,7 @@ const trocaPista = () => {
   }
   const novaPista = new Pista(listaPistas[pistaEscolhida].id, listaPistas[pistaEscolhida].posicoes, listaPistas[pistaEscolhida].checkpoints, scene);
   let inicial = novaPista.getInicial();
+  carro.inicial = inicial;
   carro.reset();
   return novaPista;
 }
@@ -172,28 +182,42 @@ const toggleInspec = () => {
   inspec = !inspec;
 }
 
+
 const keyboardUpdate = () => {
   keyboard.update();
   if(keyboard.down("space")) toggleInspec();
   if(keyboard.down("1")){
+    if(pistaEscolhida != 0){
+      virtualCamera.position.set(20,70,20);
+    }
     pistaEscolhida = 0;
     pista = trocaPista();
     carro.tempo.length = 0;
     carro.aceleracao = -0.0008;
   }
   if(keyboard.down("2")){
+    if(pistaEscolhida != 1){
+      virtualCamera.position.set(20,70,20);
+    }
     pistaEscolhida = 1;
     pista = trocaPista();
     carro.tempo.length = 0;
     carro.aceleracao = -0.0008;
   } 
   if(keyboard.down("3")){
+    if(pistaEscolhida != 2){
+      virtualCamera.position.set(45,110,40);
+    }
     pistaEscolhida = 2;
     pista = trocaPista();
+    carro.carro.rotation.y = -Math.PI/2;
     carro.tempo.length = 0;
     carro.aceleracao = -0.0008;
   } 
   if(keyboard.down("4")){
+    if(pistaEscolhida != 3){
+      virtualCamera.position.set(45,90,45);
+    }
     pistaEscolhida = 3;
     pista = trocaPista();
     carro.tempo.length = 0;
@@ -212,26 +236,53 @@ function updateCameraLookAt(){
 // posição da camera = distancia fixa + posicão do carro
 function updateCameraPosition(){
   if(distanciaCamera != carro.carro.position.distanceToSquared(camera.position)){
-    updateCameraLookAt();
     camera.position.set(carro.carro.position.x + distanciaCameraX, camera.position.y, carro.carro.position.z + distanciaCameraZ);
+  }else{
+    updateCameraLookAt();
   }
+  
 }
 carro.start();
 carro.startVolta();
 render();
 
+function vcRender(){
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+
+  renderer.setViewport(0, 0, width, height); // Reset viewport    
+  renderer.setScissorTest(false); // Disable scissor to paint the entire window
+  renderer.setClearColor("rgb(80, 70, 170)");
+  updateCameraPosition();
+  renderer.clear();   // Clean the window
+  renderer.render(scene, camera);
+
+  // If autoClear if false, clear depth buffer to avoid unwanted overlays
+  if (!renderer.autoClear) renderer.clearDepth()  // Clean the small viewport 
+  
+  let offset = 10;
+  let vcWidth = (width/3 > 400) ? 400 : width / 3;
+  let vcHeight =  vcWidth * 0.75;
+  renderer.setViewport(offset, height - vcHeight - offset, vcWidth, vcHeight);
+  renderer.setScissor(offset, height - vcHeight - offset, vcWidth-1, vcHeight -1);
+  renderer.setScissorTest(true);
+  renderer.setClearColor("rgb(60,50,150)");
+  renderer.render(scene, virtualCamera);
+}
+
 function render()
 {
   
   keyboardUpdate();
+  
   requestAnimationFrame(render);
   if(!inspec){
-    trackballControls.update();
-    trackballControls.target.copy(carro.carro.position);
+    // trackballControls.update();
+    // trackballControls.target.copy(carro.carro.position);
+    
     carro.keyboardUpdate();
     updateVoltasMessage();
     updateTempMenssage();
-    updateCameraPosition();
     carro.penalidade(pista);
     if(pista.checkpointsVisitados(carro)){
       
@@ -242,7 +293,7 @@ function render()
       pista.proximoCheckpoint = 0;
       carro.resetVolta();
     }
-    renderer.render(scene, camera) 
+    vcRender();
   }else{
     renderer.render(scene, inspecCamera);
     console.log(inspecCamera);

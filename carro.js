@@ -200,7 +200,7 @@ export class Carro {
         calota_tras_esquerda.add(pneu_tras_esquerda);
         pneu_tras_esquerda.rotateX(THREE.MathUtils.degToRad(90));
 
-        this.carro.position.set(inicial[0], inicial[1]+0.475, inicial[2]);
+        this.carro.position.set(this.inicial[0], this.inicial[1]+0.475, this.inicial[2]);
         this.carro.scale.set(0.15,0.15,0.15);
 
         this.scene.add(this.carro);
@@ -293,7 +293,7 @@ export class Carro {
         }
 
         this.resetPos = () => {
-            this.carro.position.set(inicial[0], inicial[1]+0.475, inicial[2]);
+            this.carro.position.set(this.inicial[0], this.inicial[1]+0.475, this.inicial[2]);
             this.carro.rotation.x = 0;
             this.carro.rotation.y = 0;
             this.carro.rotation.z = 0;
