@@ -177,6 +177,7 @@ export class Pista {
         if(index == 0){
           let bloco = new THREE.Mesh(cubeGeometry, materialInicial);
           bloco.position.set(element[0],element[1],element[2]);
+          bloco.receiveShadow = true;
           this.pista.add(bloco);
         }else{
           let bloco = new THREE.Mesh(cubeGeometry, material);

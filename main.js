@@ -17,12 +17,41 @@ let inspec = false;
 
 let scene, renderer, camera, material, light, orbit; // Initial variables
 scene = new THREE.Scene();    // Create main scene
-renderer = initRenderer();    // Init a basic renderer
+//renderer = initRenderer();    // Init a basic renderer
+renderer = new THREE.WebGLRenderer();
+document.getElementById("webgl-output").appendChild( renderer.domElement );  
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type  = THREE.VSMShadowMap; // default
 //camera = initCamera(new THREE.Vector3(30,15,45)); // Init camera in this position
 camera = initCamera(new THREE.Vector3(30,7,50)); // Init camera in this position
 camera.lookAt(40,0,20);
-light = initDefaultBasicLight(scene); // Enable mouse rotation, pan, zoom etc.
+ // Enable mouse rotation, pan, zoom etc.
 // initDefaultSpotlight(scene, new THREE.Vector3(35, 20, 30)); // Use default light
+
+// criando luz direcional
+let lightColor = "rgb(255,255,255)";
+let lightPosition = new THREE.Vector3(45.0, 50.0, 50.0);
+let dirLight = new THREE.DirectionalLight(lightColor);
+
+dirLight.position.copy(lightPosition)
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.width = 512;
+dirLight.shadow.mapSize.height = 512;
+dirLight.shadow.camera.near = 1;
+dirLight.shadow.camera.far = 200;
+dirLight.shadow.camera.left = -50;
+dirLight.shadow.camera.right = 50;
+dirLight.shadow.camera.top = 50;
+dirLight.shadow.camera.bottom = -50;
+dirLight.name = "Direction Light";
+
+scene.add(dirLight);
+
+// criando luz ambiente 
+let ambientColor = "rgb(50,50,50)";
+let ambientLight = new THREE.AmbientLight(ambientColor);
+scene.add(ambientLight)
 
 let inspecCamera = initCamera(new THREE.Vector3(-45,20,140));
 //inspecCamera.lookAt(150,100,200);
@@ -45,7 +74,7 @@ let pistaEscolhida = 0;
 window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
 
 // Show axes (parameter is size of each axis)
-let plane = createGroundPlaneXZ(250, 250);
+let plane = createGroundPlaneXZ(225, 225);
 scene.add(plane);
 
 
@@ -70,6 +99,9 @@ const distanciaCamera = carro.carro.position.distanceToSquared(camera.position);
 
 const distanciaCameraX = camera.position.x - carro.carro.position.x;
 const distanciaCameraZ = (camera.position.z - carro.carro.position.z);
+
+const distanciaLuzX = dirLight.position.x - carro.carro.position.x;
+const distanciaLuzZ = dirLight.position.z - carro.carro.position.z;
 
 voltasMessage.changeStyle("rgba(0,0,0,0)", "white", "32px", "ubuntu")
 voltasMessage.box.style.bottom = "92%";
@@ -226,10 +258,6 @@ const keyboardUpdate = () => {
 }
 
 
-
-
-
-
 function updateCameraLookAt(){
   camera.lookAt(carro.carro.position);
 }
@@ -237,6 +265,7 @@ function updateCameraLookAt(){
 function updateCameraPosition(){
   if(distanciaCamera != carro.carro.position.distanceToSquared(camera.position)){
     camera.position.set(carro.carro.position.x + distanciaCameraX, camera.position.y, carro.carro.position.z + distanciaCameraZ);
+    dirLight.position.set(carro.carro.position.x + distanciaLuzX, dirLight.position.y, carro.carro.position.z + distanciaLuzZ);
   }else{
     updateCameraLookAt();
   }
