@@ -55,6 +55,7 @@ export class Carro {
             let caixa = new THREE.BoxGeometry(10, 2, 5);
             const material_carro = new THREE.MeshPhongMaterial( {color: 0xF0130A });
             let chassi = new THREE.Mesh(caixa, material_carro);
+            chassi.castShadow = true;
             return chassi;
         }
 
@@ -62,6 +63,7 @@ export class Carro {
             const eixosC = new THREE.CylinderGeometry( 0.5, 0.5, 6, 24 );
             const material_eixos = new THREE.MeshPhongMaterial( { color: 0xCCCCCC } ); 
             const eixo = new THREE.Mesh(eixosC, material_eixos);
+            
             return eixo;
         }
 
