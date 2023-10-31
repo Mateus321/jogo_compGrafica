@@ -14,6 +14,7 @@ import {initRenderer,
         createGroundPlaneXZ} from "../libs/util/util.js";
 import { ConvexGeometry } from '../build/jsm/geometries/ConvexGeometry.js';
 import { BoxGeometry, Scene } from '../build/three.module.js';
+//import { convertArray } from 'three/src/animation/AnimationUtils.js';
 
 // Listen window size changes
 
@@ -22,9 +23,12 @@ import { BoxGeometry, Scene } from '../build/three.module.js';
 var scale = 1.0;
 
 // Show text information onscreen
+var tetoConvex = null;
 var teto = null;
+var paraChoquefConvex = null;
 var paraChoquef = null;
-var paraChoquet = null;
+var vidroFrenteConvex = null;
+var vidroFrente = null;
 let castShadow = true;
 let objectVisibility = true;
 
@@ -74,6 +78,8 @@ export class Carro {
         this.ssV = 0;
         this.tempoV = [''];
 
+        this.castShadow = true;
+        this.objectVisibility = true;
 
         this.carro = new THREE.Object3D();
 
@@ -85,22 +91,9 @@ export class Carro {
             return base;
         }
 
-        this.paraChoqueFrente = function(){
-            var paraChoqueF = []
 
-            paraChoqueF.push(new THREE.Vector3(1,0.5,0.8));
-            paraChoqueF.push(new THREE.Vector3(1,-0.5,0.8));
-            paraChoqueF.push(new THREE.Vector3(0.8,1,1));
-            paraChoqueF.push(new THREE.Vector3(0.8,-1,1));
-            paraChoqueF.push(new THREE.Vector3(1,0.5,0.2));
-            paraChoqueF.push(new THREE.Vector3(1,-0.5,0.2));
-            paraChoqueF.push(new THREE.Vector3(0.8,1,0));
-            paraChoqueF.push(new THREE.Vector3(0.8,-1,0));
-            
-            return paraChoqueF;
-        }
 
-        this.paraChoqueTras = function(){
+        /*this.paraChoqueTras = function(){
             var paraChoqueT = []
 
             paraChoqueT.push(new THREE.Vector3(-1,1,1));
@@ -111,7 +104,7 @@ export class Carro {
             paraChoqueT.push(new THREE.Vector3(-0.6,-1,0));
 
             return paraChoqueT;
-        }
+        }*/
 
         this.criarEixo = function (){
             const eixosC = new THREE.CylinderGeometry( 0.2, 0.2, 6, 24 );
@@ -143,15 +136,45 @@ export class Carro {
         }
 
     
-    this.teto = function(){
+    this.criaTeto = function(){
         var tetoC = []
         
-        tetoC.push(new THREE.Vector3(2,1,1));
-        tetoC.push(new THREE.Vector3(-2,1,1));
-        tetoC.push(new THREE.Vector3(2,-1,1));
-        tetoC.push(new THREE.Vector3(-2,-1,1));
-        tetoC.push(new THREE.Vector3(0.5,1,1.5));
-        tetoC.push(new THREE.Vector3(0.5,-1,1.5));
+        tetoC.push(new THREE.Vector3(2.08,0.95,1));
+        tetoC.push(new THREE.Vector3(-2,0.95,1));
+        tetoC.push(new THREE.Vector3(2.08,-0.95,1));
+        tetoC.push(new THREE.Vector3(-2,-0.95,1));
+        tetoC.push(new THREE.Vector3(0.5,0.95,1.5));
+        tetoC.push(new THREE.Vector3(0.5,-0.95,1.5));
+
+        return tetoC;
+
+    }
+
+    this.criaParaChoque = function(){
+        var paraChoqueF = []
+
+        paraChoqueF.push(new THREE.Vector3(1,0,0.8));
+        paraChoqueF.push(new THREE.Vector3(1,0.9,0.8));
+        paraChoqueF.push(new THREE.Vector3(0.8,0.9,1));
+        paraChoqueF.push(new THREE.Vector3(0.8,-0.9,1));
+        paraChoqueF.push(new THREE.Vector3(1,0.7,0.2));
+        paraChoqueF.push(new THREE.Vector3(1,-0.2,0.2));
+        paraChoqueF.push(new THREE.Vector3(0.8,1,0));
+        paraChoqueF.push(new THREE.Vector3(0.8,-1,0));
+        
+        return paraChoqueF;
+    }
+
+    this.criaVidroFrente = function(){
+
+        var vidro = [];
+
+        vidro.push(new THREE.Vector3(2.08,0.95,1));
+        vidro.push(new THREE.Vector3(-2,0.95,1));
+        vidro.push(new THREE.Vector3(2.08,-0.95,1));
+        vidro.push(new THREE.Vector3(-2,-0.95,1));
+
+        return vidro;
     }
 
 
@@ -162,27 +185,50 @@ export class Carro {
 
             scene.add(base);
             
-            var tetoP = this.teto();
+            var tetoPoints = this.criaTeto();
 
-            let convexTeto = new ConvexGeometry(tetoP);
+            tetoConvex = new ConvexGeometry(tetoPoints);
 
-            let teto = new THREE.Mesh(convexTeto, estruturaMaterial);
-            teto.castShadow = castShadow;
-            teto.visible = objectVisibility;
-            teto.translateY(2);
+            teto = new THREE.Mesh(tetoConvex, estruturaMaterial);
+            //teto.translateX(8);
+            teto.translateY(-1.60);
+            teto.rotateX(THREE.MathUtils.degToRad(-90));
+            teto.visible = true;
+            teto.castShadow = true;
+            const scale = 2.9;
+            teto.scale.set(scale, scale, scale);
             base.add(teto);
 
-            var parachoqueFP = this.paraChoqueFrente();
 
-            let convexParaF = new ConvexGeometry(parachoqueFP);
-            
-            paraChoquef = new THREE.Mesh(convexParaF, estruturaMaterial);
-            paraChoquef.castShadow = castShadow;
-            paraChoquef.visible = objectVisibility;
-            paraChoquef.rotateX(Math.PI/2);
-            paraChoquef.translateX(1.2);
-            paraChoquef.translateZ(-0.5);
+            var paraChoqueFPoints = this.criaParaChoque();
+
+            paraChoquefConvex = new ConvexGeometry(paraChoqueFPoints);
+
+            paraChoquef = new THREE.Mesh(paraChoquefConvex, estruturaMaterial);
             base.add(paraChoquef);
+            paraChoquef.translateX(3.7);
+            paraChoquef.translateY(-1.3);
+            paraChoquef.rotateX(THREE.MathUtils.degToRad(-90));
+            paraChoquef.castShadow = true;
+            const scale2 = 3;
+            paraChoquef.scale.set(scale2, scale2, scale2);
+
+
+            var vidroFrentePoints = this.criaVidroFrente();
+
+            vidroFrenteConvex = new ConvexGeometry(vidroFrentePoints);
+
+            vidroFrente = new THREE.Mesh(vidroFrenteConvex, vidroMaterial);
+            vidroFrente.translateZ(2);
+            vidroFrente.rotateX(THREE.MathUtils.degToRad(-90));
+            vidroFrente.rotateY(THREE.MathUtils.degToRad(90));
+            vidroFrente.rotateZ(THREE.MathUtils.degToRad(0))
+            const scale3 = 0.4;
+            vidroFrente.scale.set(scale3, scale3, scale3);
+            vidroFrente.castShadow = true;
+            vidroFrente.visible = true;
+
+            teto.add(vidroFrente);
 
             const eixo_frente = this.criarEixo();
             base.add(eixo_frente);
@@ -247,7 +293,7 @@ export class Carro {
         calota_tras_esquerda.add(pneu_tras_esquerda);
         pneu_tras_esquerda.rotateX(THREE.MathUtils.degToRad(90));
 
-            
+        
         }
 
         //this.carro.position.set(inicial[0], inicial[1]+0.475, inicial[2]);
