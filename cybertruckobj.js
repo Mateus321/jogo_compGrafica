@@ -31,6 +31,7 @@ var vidroFrenteConvex = null;
 var vidroFrente = null;
 let castShadow = true;
 let objectVisibility = true;
+let objOpacity = 0.01;
 
 // To use the keyboard
 
@@ -41,14 +42,15 @@ let objectVisibility = true;
 // scene.add(plane);
 var estruturaMaterial = new THREE.MeshPhongMaterial({
     color: 0xD9F7DB,
-  //opacity: objOpacity,
+  opacity: objOpacity,
   transparent: false
 });
 
 var vidroMaterial = new THREE.MeshPhongMaterial({
     color: 0x656465,
- // opacity: objOpacity,
-  transparent: true
+    opacity: objOpacity,
+    transparent: true
+    
 });
 
 
@@ -140,9 +142,9 @@ export class Carro {
         var tetoC = []
         
         tetoC.push(new THREE.Vector3(2.08,0.95,1));
-        tetoC.push(new THREE.Vector3(-2,0.95,1));
+        tetoC.push(new THREE.Vector3(-2.08,0.95,1));
         tetoC.push(new THREE.Vector3(2.08,-0.95,1));
-        tetoC.push(new THREE.Vector3(-2,-0.95,1));
+        tetoC.push(new THREE.Vector3(-2.08,-0.95,1));
         tetoC.push(new THREE.Vector3(0.5,0.95,1.5));
         tetoC.push(new THREE.Vector3(0.5,-0.95,1.5));
 
@@ -153,14 +155,14 @@ export class Carro {
     this.criaParaChoque = function(){
         var paraChoqueF = []
 
-        paraChoqueF.push(new THREE.Vector3(1,0,0.8));
+        paraChoqueF.push(new THREE.Vector3(0.8,0,0.8));
         paraChoqueF.push(new THREE.Vector3(1,0.9,0.8));
         paraChoqueF.push(new THREE.Vector3(0.8,0.9,1));
         paraChoqueF.push(new THREE.Vector3(0.8,-0.9,1));
         paraChoqueF.push(new THREE.Vector3(1,0.7,0.2));
         paraChoqueF.push(new THREE.Vector3(1,-0.2,0.2));
-        paraChoqueF.push(new THREE.Vector3(0.8,1,0));
-        paraChoqueF.push(new THREE.Vector3(0.8,-1,0));
+        //paraChoqueF.push(new THREE.Vector3(0.8,1,0));
+        //paraChoqueF.push(new THREE.Vector3(0.8,-1,0));
         
         return paraChoqueF;
     }
@@ -169,10 +171,10 @@ export class Carro {
 
         var vidro = [];
 
-        vidro.push(new THREE.Vector3(2.08,0.95,1));
-        vidro.push(new THREE.Vector3(-2,0.95,1));
-        vidro.push(new THREE.Vector3(2.08,-0.95,1));
-        vidro.push(new THREE.Vector3(-2,-0.95,1));
+        vidro.push(new THREE.Vector3(2.08,2,1));
+        vidro.push(new THREE.Vector3(-2,2,1));
+        vidro.push(new THREE.Vector3(2.08,-1.5,1));
+        vidro.push(new THREE.Vector3(-2,-1.5,1));
 
         return vidro;
     }
@@ -183,7 +185,7 @@ export class Carro {
             
             let base = this.criaBase();
 
-            scene.add(base);
+            carro.carro.add(base);
             
             var tetoPoints = this.criaTeto();
 
@@ -195,6 +197,7 @@ export class Carro {
             teto.rotateX(THREE.MathUtils.degToRad(-90));
             teto.visible = true;
             teto.castShadow = true;
+            teto.receiveShadow = true;
             const scale = 2.9;
             teto.scale.set(scale, scale, scale);
             base.add(teto);
@@ -219,13 +222,15 @@ export class Carro {
             vidroFrenteConvex = new ConvexGeometry(vidroFrentePoints);
 
             vidroFrente = new THREE.Mesh(vidroFrenteConvex, vidroMaterial);
-            vidroFrente.translateZ(2);
-            vidroFrente.rotateX(THREE.MathUtils.degToRad(-90));
-            vidroFrente.rotateY(THREE.MathUtils.degToRad(90));
-            vidroFrente.rotateZ(THREE.MathUtils.degToRad(0))
+            vidroFrente.translateZ(0.87);
+            vidroFrente.translateX(1.2);
+            vidroFrente.rotateX(THREE.MathUtils.degToRad(0));
+            vidroFrente.rotateY(THREE.MathUtils.degToRad(17 ));
+            vidroFrente.rotateZ(THREE.MathUtils.degToRad(90))
             const scale3 = 0.4;
             vidroFrente.scale.set(scale3, scale3, scale3);
-            vidroFrente.castShadow = true;
+            vidroFrente.castShadow = false;
+            vidroFrente.receiveShadow = false;
             vidroFrente.visible = true;
 
             teto.add(vidroFrente);
@@ -504,6 +509,7 @@ export class Carro {
           }   */
     }
 
+
     
 
 }
@@ -514,11 +520,11 @@ camera = initCamera(new THREE.Vector3(0, 10, 10)); // Init camera in this positi
 material = setDefaultMaterial(); // create a basic material
 light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
 orbit = new OrbitControls( camera, renderer.domElement ); // Enable mouse rotation, pan, zoom etc.
-let carro = new Carro(scene, camera)
+let carro = new Carro(scene, camera);
 render();
     function render()
     {
-        renderer.render(carro.scene, carro.camera);
+        renderer.render(scene, camera);
         requestAnimationFrame(render);
         carro.updateConvexObject();
 
