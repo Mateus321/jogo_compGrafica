@@ -106,11 +106,11 @@ export const listaPistas = [
                 [0.0,0.0, 20.0],
 
   ],
-  checkpoints:  [new THREE.Vector3(10.0,0.0,40.0),
-                 new THREE.Vector3(0.0,0.0,0.0),
-                 new THREE.Vector3(20.0,0.0,20.0),
-                 new THREE.Vector3(40.0,0.0,20.0),
-                 new THREE.Vector3(10.0,0.0,40.0)] 
+  checkpoints:  [new THREE.Vector3(0.0,0.0,0.0),
+                 new THREE.Vector3(80.0,0.0,30.0),
+                 new THREE.Vector3(80.0,0.0,80.0),
+                 new THREE.Vector3(30.0,0.0,60.0),
+                 new THREE.Vector3(0.0,0.0,20.0)] 
                 },
 
   { id: 4, 
@@ -145,11 +145,14 @@ export const listaPistas = [
     [80.0,0.0, 60.0],
     [80.0,0.0, 70.0],
               ],
-  checkpoints:  [new THREE.Vector3(10.0,0.0,40.0),
-                 new THREE.Vector3(0.0,0.0,0.0),
-                 new THREE.Vector3(20.0,0.0,20.0),
-                 new THREE.Vector3(40.0,0.0,20.0),
-                 new THREE.Vector3(10.0,0.0,40.0)] 
+  checkpoints:  [
+                 new THREE.Vector3(50.0,0.0,30.0),
+                 new THREE.Vector3(10.0,0.0,30.0),
+                 new THREE.Vector3(30.0,0.0,30.0),
+                 new THREE.Vector3(30.0,0.0,50.0), 
+                 new THREE.Vector3(80.0,0.0,50.0), 
+                 new THREE.Vector3(80.0,0.0,80.0),
+                 new THREE.Vector3(50.0,0.0,80.0)] 
   }
 ]
 
@@ -217,6 +220,7 @@ export class Pista {
     
     this.checkpointsVisitados = (carro) => {
       this.proximoCheckpointVisitado(carro);
+      
       return this.checkpoints.every((checkpoint) => { 
         return carro.checkpointsVisitados.includes(checkpoint);
       })
