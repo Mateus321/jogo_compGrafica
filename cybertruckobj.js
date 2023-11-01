@@ -170,12 +170,19 @@ export class Carro {
     this.criaParaChoque = function(){
         var paraChoqueF = []
 
-        paraChoqueF.push(new THREE.Vector3(0.8,0,0.8));
-        paraChoqueF.push(new THREE.Vector3(1,0.9,0.8));
-        paraChoqueF.push(new THREE.Vector3(0.8,0.9,1));
-        paraChoqueF.push(new THREE.Vector3(0.8,-0.9,1));
-        paraChoqueF.push(new THREE.Vector3(1,0.7,0.2));
-        paraChoqueF.push(new THREE.Vector3(1,-0.2,0.2));
+        paraChoqueF.push(new THREE.Vector3(0, 0, 0));
+        paraChoqueF.push(new THREE.Vector3(0, 0, 1.1));
+        paraChoqueF.push(new THREE.Vector3(0.5, 0.5, 0.8));
+        paraChoqueF.push(new THREE.Vector3(0.4, 0.5, 0.3));
+
+        paraChoqueF.push(new THREE.Vector3(0, 2.8, 0 ));
+        paraChoqueF.push(new THREE.Vector3(0, 2.8, 1.1));
+        paraChoqueF.push(new THREE.Vector3(0.5, 2.3, 0.8));
+        paraChoqueF.push(new THREE.Vector3(0.4, 2.3, 0.3));
+
+        // paraChoqueF.push(new THREE.Vector3(0.8,-0.9,1));
+        // paraChoqueF.push(new THREE.Vector3(1,0.7,0.2));
+        // paraChoqueF.push(new THREE.Vector3(1,-0.2,0.2));
         //paraChoqueF.push(new THREE.Vector3(0.8,1,0));
         //paraChoqueF.push(new THREE.Vector3(0.8,-1,0));
         
@@ -262,11 +269,12 @@ export class Carro {
 
             paraChoquef = new THREE.Mesh(paraChoquefConvex, estruturaMaterial);
             base.add(paraChoquef);
-            paraChoquef.translateX(3.7);
-            paraChoquef.translateY(-1.3);
+            paraChoquef.translateX(6);
+            paraChoquef.translateY(-1.1);
+            paraChoquef.translateZ(2.8);
             paraChoquef.rotateX(THREE.MathUtils.degToRad(-90));
             paraChoquef.castShadow = true;
-            const scale2 = 3;
+            const scale2 = 2;
             paraChoquef.scale.set(scale2, scale2, scale2);
 
 
