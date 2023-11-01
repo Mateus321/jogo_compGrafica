@@ -225,8 +225,6 @@ const toggleCamChange = () => {
   }else{
     camMode += 1;
   }
-  console.log(carro.carro.position);
-  console.log(camMode);
   switch(camMode){
     case 0:
     carro.carro.scale.set(0.15,0.15,0.15);
@@ -394,7 +392,6 @@ function render()
       updateVelocidadeMessage();
       carro.penalidade(pista);
       if(pista.checkpointsVisitados(carro)){
-        
         carro.tempo.push(carro.tempo[0]);
         carro.tempoV.push(carro.tempoV[0]);
         carro.voltas += 1;
