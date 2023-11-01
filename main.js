@@ -95,6 +95,7 @@ let volta1Message = new SecondaryBox("");
 let volta2Message = new SecondaryBox("");
 let volta3Message = new SecondaryBox("");
 let volta4Message = new SecondaryBox("");
+let velocidadeMessage = new SecondaryBox("");
 
 
 let pista = new Pista(listaPistas[pistaEscolhida].id, listaPistas[pistaEscolhida].posicoes, listaPistas[pistaEscolhida].checkpoints, scene);
@@ -117,6 +118,10 @@ voltasMessage.changeStyle("rgba(0,0,0,0)", "white", "32px", "ubuntu")
 voltasMessage.box.style.bottom = "92%";
 voltasMessage.box.style.left = "2%";
 
+velocidadeMessage.changeStyle("rgba(55,55,55,0)", "white", "32px", "unbutu");
+velocidadeMessage.box.style.bottom = "8%";
+velocidadeMessage.box.style.left = "80%";
+
 tempMessage.changeStyle("rgba(0,0,0,0)", "white", "32px", "ubuntu")
 tempMessage.box.style.bottom = "88%";
 tempMessage.box.style.left = "2%";
@@ -136,6 +141,11 @@ volta3Message.box.style.left = "2%";
 volta4Message.changeStyle("rgba(0,0,0,0)", "white", "32px", "ubuntu")
 volta4Message.box.style.bottom = "72%";
 volta4Message.box.style.left = "2%";
+
+function updateVelocidadeMessage(){
+  let str = "Velocidade: " + (0 - Number(carro.velocidade * 200).toFixed(3)) + "   m/s"; 
+  velocidadeMessage.changeMessage(str);
+}
 
 
 function updateVoltasMessage()
@@ -381,6 +391,7 @@ function render()
       carro.keyboardUpdate();
       updateVoltasMessage();
       updateTempMenssage();
+      updateVelocidadeMessage();
       carro.penalidade(pista);
       if(pista.checkpointsVisitados(carro)){
         
@@ -397,6 +408,7 @@ function render()
       carro.keyboardUpdate();
       updateVoltasMessage();
       updateTempMenssage();
+      updateVelocidadeMessage();
       carro.penalidade(pista);
       if(pista.checkpointsVisitados(carro)){
         
