@@ -28,7 +28,15 @@ var teto = null;
 var paraChoquefConvex = null;
 var paraChoquef = null;
 var vidroFrenteConvex = null;
+var vidroLateralConvex = null;
+var vidroLateral1Convex = null;
+var vidroTraseiroConvex = null;
+var tampaTraseiraConvex = null;
 var vidroFrente = null;
+var vidroLateral = null;
+var vidroLateral1 = null;
+var vidroTraseiro = null;
+var tampaTraseira = null;
 let castShadow = true;
 let objectVisibility = true;
 let objOpacity = 0.01;
@@ -43,7 +51,8 @@ let objOpacity = 0.01;
 var estruturaMaterial = new THREE.MeshPhongMaterial({
     color: 0xD9F7DB,
   opacity: objOpacity,
-  transparent: false
+  transparent: false,
+  
 });
 
 var vidroMaterial = new THREE.MeshPhongMaterial({
@@ -51,6 +60,12 @@ var vidroMaterial = new THREE.MeshPhongMaterial({
     opacity: objOpacity,
     transparent: true
     
+});
+
+var tampaMaterial = new THREE.MeshPhongMaterial({
+    color: 0x656035,
+    opacity: objOpacity,
+    transparent: true
 });
 
 
@@ -86,7 +101,7 @@ export class Carro {
         this.carro = new THREE.Object3D();
 
         this.criaBase = function(){
-            const baseGeometry = new BoxGeometry(12, 2.6, 5.5);
+            const baseGeometry = new BoxGeometry(12, 2.2, 5.5);
             const base = new THREE.Mesh(baseGeometry, estruturaMaterial);
             base.castShadow = castShadow;
             base.objectVisibility = objectVisibility;
@@ -141,10 +156,10 @@ export class Carro {
     this.criaTeto = function(){
         var tetoC = []
         
-        tetoC.push(new THREE.Vector3(2.08,0.95,1));
-        tetoC.push(new THREE.Vector3(-2.08,0.95,1));
-        tetoC.push(new THREE.Vector3(2.08,-0.95,1));
-        tetoC.push(new THREE.Vector3(-2.08,-0.95,1));
+        tetoC.push(new THREE.Vector3(2.06,0.95,1));
+        tetoC.push(new THREE.Vector3(-2.06,0.95,1));
+        tetoC.push(new THREE.Vector3(2.06,-0.95,1));
+        tetoC.push(new THREE.Vector3(-2.06,-0.95,1));
         tetoC.push(new THREE.Vector3(0.5,0.95,1.5));
         tetoC.push(new THREE.Vector3(0.5,-0.95,1.5));
 
@@ -179,6 +194,44 @@ export class Carro {
         return vidro;
     }
 
+    this.criaVidroLaterial = function(){
+
+        var vidro = [];
+
+        vidro.push(new THREE.Vector3(-0.4, 0 , 0.4));
+        vidro.push(new THREE.Vector3(6.7, 0, 0.4));
+        vidro.push(new THREE.Vector3(0, 0, 1));
+        vidro.push(new THREE.Vector3(3, 0, 1.6));  
+
+        return vidro;
+    }
+
+    this.criaVidroTraseiro = function(){
+
+        var vidro = [];
+
+        vidro.push(new THREE.Vector3(2.08,2,1));
+        vidro.push(new THREE.Vector3(-2,2,1));
+        vidro.push(new THREE.Vector3(2.08,-1,1));
+        vidro.push(new THREE.Vector3(-2,-1,1));
+
+        return vidro;
+
+    }
+
+    this.criaTampaTraseira = function(){
+
+        var tampa = [];
+
+        tampa.push(new THREE.Vector3(2.08,2,1));
+        tampa.push(new THREE.Vector3(-2,2,1));
+        tampa.push(new THREE.Vector3(2.08,-1,1));
+        tampa.push(new THREE.Vector3(-2,-1,1));
+
+        return tampa;
+
+    }
+
 
 
         this.updateConvexObject = function(){
@@ -193,7 +246,7 @@ export class Carro {
 
             teto = new THREE.Mesh(tetoConvex, estruturaMaterial);
             //teto.translateX(8);
-            teto.translateY(-1.60);
+            teto.translateY(-1.8);
             teto.rotateX(THREE.MathUtils.degToRad(-90));
             teto.visible = true;
             teto.castShadow = true;
@@ -234,6 +287,58 @@ export class Carro {
             vidroFrente.visible = true;
 
             teto.add(vidroFrente);
+
+            var vidroLateralPoints = this.criaVidroLaterial();
+
+            vidroLateralConvex = new ConvexGeometry(vidroLateralPoints);
+
+            vidroLateral = new THREE.Mesh(vidroLateralConvex, vidroMaterial);
+            vidroLateral.translateZ(0.83); 
+            vidroLateral.translateY(-1);
+            vidroLateral.translateX(-0.7)
+            const scale4 = 0.4;
+            vidroLateral.scale.set(scale4, scale4, scale4);
+
+            teto.add(vidroLateral);
+
+            vidroLateral1Convex = new ConvexGeometry(vidroLateralPoints);
+
+            vidroLateral1 = new THREE.Mesh(vidroLateral1Convex, vidroMaterial);
+            vidroLateral1.translateZ(0.83); 
+            vidroLateral1.translateY(0.96);
+            vidroLateral1.translateX(-0.7)
+            vidroLateral1.scale.set(scale4, scale4, scale4);
+
+            teto.add(vidroLateral1);
+
+            var vidroTraseiroPoints = this.criaVidroTraseiro();
+
+            vidroTraseiroConvex = new ConvexGeometry(vidroTraseiroPoints);
+            
+            vidroTraseiro = new THREE.Mesh(vidroTraseiroConvex, vidroMaterial);
+        
+            vidroTraseiro.scale.set(scale3, scale3, scale3);
+            vidroTraseiro.translateZ(0.95);
+            vidroTraseiro.translateX(-0.3);
+            vidroTraseiro.rotateX(THREE.MathUtils.degToRad(0));
+            vidroTraseiro.rotateY(THREE.MathUtils.degToRad(-11 ));
+            vidroTraseiro.rotateZ(THREE.MathUtils.degToRad(-90));
+            teto.add(vidroTraseiro);
+
+            var tampaTraseiraPoints = this.criaTampaTraseira();
+
+            tampaTraseiraConvex = new ConvexGeometry(tampaTraseiraPoints);
+
+            tampaTraseira = new THREE.Mesh(tampaTraseiraConvex, tampaMaterial);
+
+            tampaTraseira.scale.set(scale3, scale3, scale3);
+            tampaTraseira.translateZ(0.72);
+            tampaTraseira.translateX(-1.5);
+            tampaTraseira.rotateX(THREE.MathUtils.degToRad(0));
+            tampaTraseira.rotateY(THREE.MathUtils.degToRad(-11 ));
+            tampaTraseira.rotateZ(THREE.MathUtils.degToRad(-90));
+            teto.add(tampaTraseira);
+
 
             const eixo_frente = this.criarEixo();
             base.add(eixo_frente);
@@ -518,8 +623,31 @@ scene = new THREE.Scene();    // Create main scene
 renderer = initRenderer();    // Init a basic renderer
 camera = initCamera(new THREE.Vector3(0, 10, 10)); // Init camera in this position
 material = setDefaultMaterial(); // create a basic material
-light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
+//light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
 orbit = new OrbitControls( camera, renderer.domElement ); // Enable mouse rotation, pan, zoom etc.
+
+let lightColor = "rgb(255,255,255)";
+let lightPosition = new THREE.Vector3(0, 50.0, -20);
+let dirLight = new THREE.DirectionalLight(lightColor);
+
+dirLight.position.copy(lightPosition)
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.width = 512;
+dirLight.shadow.mapSize.height = 512;
+dirLight.shadow.camera.near = 1;
+dirLight.shadow.camera.far = 200;
+dirLight.shadow.camera.left = -50;
+dirLight.shadow.camera.right = 50;
+dirLight.shadow.camera.top = 50;
+dirLight.shadow.camera.bottom = -50;
+dirLight.name = "Direction Light";
+
+scene.add(dirLight);
+
+let ambientColor = "rgb(50,50,50)";
+let ambientLight = new THREE.AmbientLight(ambientColor);
+scene.add(ambientLight)
+
 let carro = new Carro(scene, camera);
 render();
     function render()
