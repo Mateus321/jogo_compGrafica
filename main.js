@@ -386,7 +386,7 @@ function render()
     // trackballControls.update();
     // trackballControls.target.copy(carro.carro.position);
     case 0:
-      carro.keyboardUpdate();
+      carro.keyboardUpdate(camMode);
       updateVoltasMessage();
       updateTempMenssage();
       updateVelocidadeMessage();
@@ -402,7 +402,7 @@ function render()
       vcRender();
     break;
     case 1:
-      carro.keyboardUpdate();
+      carro.keyboardUpdate(camMode);
       updateVoltasMessage();
       updateTempMenssage();
       updateVelocidadeMessage();
@@ -420,6 +420,7 @@ function render()
       break;
     case 2:
       vcRenderInspec();
+      carro.keyboardUpdate(camMode)
       break;
     }
 }// Render scene
