@@ -144,7 +144,7 @@ volta4Message.box.style.bottom = "72%";
 volta4Message.box.style.left = "2%";
 
 function updateVelocidadeMessage(){
-  let str = "Velocidade: " + (0 - Number(carro.velocidade * 200).toFixed(3)) + "   m/s"; 
+  let str = "Velocidade: " + (Number(carro.velocidade * 200).toFixed(3)) + "   m/s"; 
   velocidadeMessage.changeMessage(str);
 }
 
@@ -256,7 +256,7 @@ const keyboardUpdate = () => {
     pistaEscolhida = 0;
     pista = trocaPista();
     carro.tempo.length = 0;
-    carro.aceleracao = -0.0008;
+    carro.aceleracao = 0.0008;
   }
   if(keyboard.down("2")){
     if(pistaEscolhida != 1){
@@ -265,7 +265,7 @@ const keyboardUpdate = () => {
     pistaEscolhida = 1;
     pista = trocaPista();
     carro.tempo.length = 0;
-    carro.aceleracao = -0.0008;
+    carro.aceleracao = 0.0008;
   } 
   if(keyboard.down("3")){
     if(pistaEscolhida != 2){
@@ -273,9 +273,9 @@ const keyboardUpdate = () => {
     }
     pistaEscolhida = 2;
     pista = trocaPista();
-    carro.carro.rotation.y = -Math.PI/2;
+    carro.carro.rotation.y = Math.PI/2;
     carro.tempo.length = 0;
-    carro.aceleracao = -0.0008;
+    carro.aceleracao = 0.0008;
   } 
   if(keyboard.down("4")){
     if(pistaEscolhida != 3){
@@ -284,7 +284,7 @@ const keyboardUpdate = () => {
     pistaEscolhida = 3;
     pista = trocaPista();
     carro.tempo.length = 0;
-    carro.aceleracao = -0.0008;
+    carro.aceleracao = 0.0008;
   } 
 }
 
@@ -306,7 +306,7 @@ function updateCamera3rdLookAt(){
 function updateCamera3rdPosition(){
   let matrix = new THREE.Matrix4();
   matrix.extractRotation(carro.carro.matrix);
-  let offset = new THREE.Vector3 (distanciaCamera3rdX, 4 ,distanciaCamera3rdZ);
+  let offset = new THREE.Vector3 (-distanciaCamera3rdX, 4 ,-distanciaCamera3rdZ);
   offset.applyMatrix4(matrix);
   let camera3rdPosition = carro.carro.position.clone().add(offset);
   camera3rd.position.set(camera3rdPosition.x, camera3rd.position.y, camera3rdPosition.z);
@@ -383,6 +383,7 @@ function render()
   keyboardUpdate();
   
   requestAnimationFrame(render);
+  carro.updateConvexObject();
   
   switch(camMode){
     // trackballControls.update();

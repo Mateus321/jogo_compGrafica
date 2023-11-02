@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
 import { Pista } from "./pistaarray.js";
+import { CSG} from '../libs/other/CSGMesh.js' 
 
 import {
   initRenderer,
@@ -38,7 +39,8 @@ var vidroTraseiro = null;
 var tampaTraseira = null;
 let castShadow = true;
 let objectVisibility = true;
-let objOpacity = 0.01;
+let objOpacity = 0.05;
+const numInstances = 100;
 
 // To use the keyboard
 
@@ -58,11 +60,17 @@ var vidroMaterial = new THREE.MeshPhongMaterial({
   transparent: true,
 });
 
-var tampaMaterial = new THREE.MeshPhongMaterial({
-  color: 0x627885,
-  opacity: objOpacity,
+var tampaMaterial = new THREE.MeshLambertMaterial({
+  color: 0x1e1e1e,
+  opacity: 0.1,
   transparent: true,
 });
+
+function updateObject(mesh)
+{
+   mesh.matrixAutoUpdate = false;
+   mesh.updateMatrix();
+}
 
 export class Carro {
   constructor(scene, inicial, keyboard) {
@@ -95,8 +103,34 @@ export class Carro {
     this.carro = new THREE.Object3D();
 
     this.criaBase = function () {
-      const baseGeometry = new BoxGeometry(12, 2.2, 5.5);
-      const base = new THREE.Mesh(baseGeometry, estruturaMaterial);
+      let auxMat = new THREE.Matrix4();
+      let baseMesh = new THREE.Mesh( new THREE.BoxGeometry(12, 2.2, 5.5));
+      let cylinderMesh = new THREE.Mesh( new THREE.CylinderGeometry(0.26, 0.26, 0.2, 8))
+      cylinderMesh.position.set(3,-1,-3);
+      cylinderMesh.scale.set(5,5,5);
+      cylinderMesh.rotateX(THREE.MathUtils.degToRad(90));
+      updateObject(cylinderMesh);
+      let baseCSG = CSG.fromMesh(baseMesh);
+      let cylinderCSG = CSG.fromMesh(cylinderMesh);
+      let csgObject = baseCSG.subtract(cylinderCSG);
+      cylinderMesh.position.set(3,-1, 3);
+      updateObject(cylinderMesh);
+      cylinderCSG = CSG.fromMesh(cylinderMesh);
+      cylinderMesh.position.set(3,-1, 3);
+      updateObject(cylinderMesh);
+      cylinderCSG = CSG.fromMesh(cylinderMesh);
+      csgObject = csgObject.subtract(cylinderCSG);
+      cylinderMesh.position.set(-4,-1, -3);
+      updateObject(cylinderMesh);
+      cylinderCSG = CSG.fromMesh(cylinderMesh);
+      csgObject = csgObject.subtract(cylinderCSG);
+      cylinderMesh.position.set(-4,-1, 3);
+      updateObject(cylinderMesh);
+      cylinderCSG = CSG.fromMesh(cylinderMesh);
+      csgObject = csgObject.subtract(cylinderCSG);
+      let base = CSG.toMesh(csgObject, auxMat);
+      // base.add(cylinderMesh);
+      base.material = estruturaMaterial;
       base.castShadow = castShadow;
       base.objectVisibility = objectVisibility;
       return base;
@@ -117,30 +151,38 @@ export class Carro {
 
     this.criarEixo = function () {
       const eixosC = new THREE.CylinderGeometry(0.2, 0.2, 6, 24);
-      const material_eixos = new THREE.MeshPhongMaterial({ color: 0xcccccc });
+      const material_eixos = new THREE.MeshLambertMaterial({ color: 0xcccccc });
       const eixo = new THREE.Mesh(eixosC, material_eixos);
       return eixo;
     };
 
     this.criarEsfera = () => {
-      const geometria_esfera = new THREE.CylinderGeometry(0.8, 0.8, 0.6, 8);
-      const material_esfera = new THREE.MeshPhongMaterial({ color: 0xe3efdf });
+      const geometria_esfera = new THREE.SphereGeometry(0.1, 32, 16);
+      const material_esfera = new THREE.MeshLambertMaterial({ color: 0xe3efdf });
       const esfera = new THREE.Mesh(geometria_esfera, material_esfera);
       return esfera;
     };
 
     this.criarCalota = function () {
-      const calotaS = new THREE.SphereGeometry(0.1, 32, 16);
-      const material_calota = new THREE.MeshPhongMaterial({ color: 0xe3efdf });
+      const calotaS = new THREE.CylinderGeometry(0.8, 0.8, 0.6, 8);
+      const material_calota = new THREE.MeshLambertMaterial({ color: 0xe3efdf });
       const calota = new THREE.Mesh(calotaS, material_calota);
       return calota;
     };
+    
     this.criarPneu = function () {
       const rodas = new THREE.TorusGeometry(0.8, 0.3, 16, 50);
-      const material_rodas = new THREE.MeshPhongMaterial({ color: 0x670 });
+      const material_rodas = new THREE.MeshLambertMaterial({ color: 0x1e1e1e});
       const roda = new THREE.Mesh(rodas, material_rodas);
       return roda;
     };
+
+    this.criaAro = () => {
+      const geometria_aro = new THREE.BoxGeometry(0.1, 1.4 , 0.01);
+      const material_aro = new THREE.MeshLambertMaterial({ color: 0x1e1e1e });
+      const aro = new THREE.Mesh(geometria_aro, material_aro);
+      return aro;
+    }
 
     this.criaTeto = function () {
       var tetoC = [];
@@ -152,7 +194,10 @@ export class Carro {
       tetoC.push(new THREE.Vector3(0.5, 0.95, 1.5));
       tetoC.push(new THREE.Vector3(0.5, -0.95, 1.5));
 
-      return tetoC;
+      let tetoPoints = tetoC;
+
+      tetoConvex = new ConvexGeometry(tetoPoints);
+      return tetoConvex;
     };
 
     this.criaParaChoque = function () {
@@ -168,7 +213,11 @@ export class Carro {
       paraChoqueF.push(new THREE.Vector3(0.5, 2.3, 0.8));
       paraChoqueF.push(new THREE.Vector3(0.4, 2.3, 0.3));
 
-      return paraChoqueF;
+      paraChoqueFPoints = paraChoqueF;
+
+      paraChoquefConvex = new ConvexGeometry(paraChoqueFPoints);
+
+      return paraChoquefConvex;
     };
 
     this.criaVidroFrente = function () {
@@ -179,18 +228,26 @@ export class Carro {
       vidro.push(new THREE.Vector3(2.08, -1.5, 1));
       vidro.push(new THREE.Vector3(-2, -1.5, 1));
 
-      return vidro;
+      let vidroFrentePoints = vidro;
+
+      vidroFrenteConvex = new ConvexGeometry(vidroFrentePoints);
+
+      return vidroFrenteConvex;
     };
 
-    this.criaVidroLaterial = function () {
-      var vidro = [];
+    this.criaVidroLateral = function () {
+      let vidro = [];
 
       vidro.push(new THREE.Vector3(-0.4, 0, 0.4));
       vidro.push(new THREE.Vector3(6.7, 0, 0.4));
       vidro.push(new THREE.Vector3(0, 0, 1));
       vidro.push(new THREE.Vector3(3, 0, 1.6));
 
-      return vidro;
+      let vidroLateralPoints = vidro;
+
+      vidroLateralConvex = new ConvexGeometry(vidroLateralPoints);
+
+      return vidroLateralConvex;
     };
 
     this.criaVidroTraseiro = function () {
@@ -201,7 +258,11 @@ export class Carro {
       vidro.push(new THREE.Vector3(2.08, -1, 1));
       vidro.push(new THREE.Vector3(-2, -1, 1));
 
-      return vidro;
+      vidroTraseiroPoints = vidro;
+
+      vidroTraseiroConvex = new ConvexGeometry(vidroTraseiroPoints);
+
+      return vidroTraseiroConvex;
     };
 
     this.criaTampaTraseira = function () {
@@ -212,110 +273,306 @@ export class Carro {
       tampa.push(new THREE.Vector3(2.08, -1, 1));
       tampa.push(new THREE.Vector3(-2, -1, 1));
 
-      return tampa;
+      let tampaTraseiraPoints = tampa;
+
+      tampaTraseiraConvex = new ConvexGeometry(tampaTraseiraPoints);
+
+      return tampaTraseiraConvex;
     };
 
     let base;
-    let tetoPoints;
+    // let tetoPoints = this.criaTeto();
+
     let paraChoqueFPoints;
     let vidroFrentePoints;
     let vidroLateralPoints;
     let vidroTraseiroPoints;
-    let tampaTraseiraPoints;    
+    let tampaTraseiraPoints;
+    base = this.criaBase();
+    this.carro.add(base);
 
-    this.updateConvexObject = function () {
-      base = this.criaBase();
+    tetoConvex = this.criaTeto();
+    const tetoInstanceGeometry = new THREE.InstancedBufferGeometry().copy(
+      tetoConvex
+    );
 
-      this.carro.add(base);
+    teto = new THREE.InstancedMesh(tetoConvex, estruturaMaterial, numInstances);
 
-      tetoPoints = this.criaTeto();
+    teto.translateY(-1.8);
+    teto.rotateX(THREE.MathUtils.degToRad(-90));
+    teto.visible = true;
+    teto.castShadow = true;
+    teto.receiveShadow = true;
+    const scale = 2.9;
+    teto.scale.set(scale, scale, scale);
+    base.add(teto);
 
-      tetoConvex = new ConvexGeometry(tetoPoints);
+    const matrixTeto = new THREE.Matrix4();
+    const matrixTetoArray = new Float32Array(numInstances * 16);
 
-      teto = new THREE.Mesh(tetoConvex, estruturaMaterial);
-      //teto.translateX(8);
-      teto.translateY(-1.8);
-      teto.rotateX(THREE.MathUtils.degToRad(-90));
-      teto.visible = true;
-      teto.castShadow = true;
-      teto.receiveShadow = true;
-      const scale = 2.9;
-      teto.scale.set(scale, scale, scale);
-      base.add(teto);
+    this.updateMatrixTeto = () => {
+      for (let i = 0; i < numInstances; i++) {
+        matrixTeto.identity();
+        matrixTeto.setPosition(
+          teto.position.x,
+          teto.position.y,
+          teto.position.z
+        );
+        matrixTeto.makeRotationFromEuler(
+          new THREE.Euler(teto.rotation.x, teto.rotation.y, teto.rotation.z)
+        );
+        matrixTetoArray.set(matrixTeto.elements, i * 16);
+      }
+    };
 
-      paraChoqueFPoints = this.criaParaChoque();
+    this.updateMatrixTeto();
 
-      paraChoquefConvex = new ConvexGeometry(paraChoqueFPoints);
+    tetoInstanceGeometry.setAttribute(
+      "instanceMatrix",
+      new THREE.InstancedBufferAttribute(matrixTetoArray, 16)
+    );
 
-      paraChoquef = new THREE.Mesh(paraChoquefConvex, estruturaMaterial);
-      base.add(paraChoquef);
-      paraChoquef.translateX(6);
-      paraChoquef.translateY(-1.1);
-      paraChoquef.translateZ(2.85);
-      paraChoquef.rotateX(THREE.MathUtils.degToRad(-90));
-      paraChoquef.castShadow = true;
-      const scale2 = 2;
-      paraChoquef.scale.set(scale2, scale2, scale2);
-    vidroFrentePoints = this.criaVidroFrente();
+    vidroFrenteConvex = this.criaVidroFrente();
 
-      vidroFrenteConvex = new ConvexGeometry(vidroFrentePoints);
+    const vidroFrenteInstanceGeometry =
+      new THREE.InstancedBufferGeometry().copy(vidroFrenteConvex);
 
-      vidroFrente = new THREE.Mesh(vidroFrenteConvex, vidroMaterial);
-      vidroFrente.translateZ(0.87);
-      vidroFrente.translateX(1.2);
-      vidroFrente.rotateX(THREE.MathUtils.degToRad(0));
-      vidroFrente.rotateY(THREE.MathUtils.degToRad(17));
-      vidroFrente.rotateZ(THREE.MathUtils.degToRad(90));
-      const scale3 = 0.4;
-      vidroFrente.scale.set(scale3, scale3, scale3);
-      vidroFrente.castShadow = false;
-      vidroFrente.receiveShadow = false;
-      vidroFrente.visible = true;
+    vidroFrente = new THREE.InstancedMesh(
+      vidroFrenteConvex,
+      vidroMaterial,
+      numInstances
+    );
+    vidroFrente.translateZ(0.87);
+    vidroFrente.translateX(1.2);
+    vidroFrente.rotateX(THREE.MathUtils.degToRad(0));
+    vidroFrente.rotateY(THREE.MathUtils.degToRad(17));
+    vidroFrente.rotateZ(THREE.MathUtils.degToRad(90));
+    const scale3 = 0.4;
+    vidroFrente.scale.set(scale3, scale3, scale3);
+    vidroFrente.castShadow = false;
+    vidroFrente.receiveShadow = false;
+    vidroFrente.visible = true;
+    teto.add(vidroFrente);
 
-      teto.add(vidroFrente);
+    const matrixVidroFrente = new THREE.Matrix4();
+    const matrixVidroFrenteArray = new Float32Array(numInstances * 16);
 
-      vidroLateralPoints = this.criaVidroLaterial();
+    this.updateMatrixVidroFrente = () => {
+      for (let i = 0; i < numInstances; i++) {
+        matrixVidroFrente.identity();
+        matrixVidroFrente.setPosition(
+          vidroFrente.position.x,
+          vidroFrente.position.y,
+          vidroFrente.position.z
+        );
+        matrixVidroFrente.makeRotationFromEuler(
+          new THREE.Euler(
+            vidroFrente.rotation.x,
+            vidroFrente.rotation.y,
+            vidroFrente.rotation.z
+          )
+        );
+        matrixVidroFrenteArray.set(matrixVidroFrente.elements * 16);
+      }
+    };
 
-      vidroLateralConvex = new ConvexGeometry(vidroLateralPoints);
+    this.updateMatrixVidroFrente();
 
-      vidroLateral = new THREE.Mesh(vidroLateralConvex, vidroMaterial);
-      vidroLateral.translateZ(0.83);
-      vidroLateral.translateY(-1);
-      vidroLateral.translateX(-0.7);
-      const scale4 = 0.4;
-      vidroLateral.scale.set(scale4, scale4, scale4);
+    vidroFrenteInstanceGeometry.setAttribute(
+      "instanceMatrix",
+      new THREE.InstancedBufferAttribute(matrixVidroFrenteArray, 16)
+    );
 
-      teto.add(vidroLateral);
+    paraChoquefConvex = this.criaParaChoque();
 
-      vidroLateral1Convex = new ConvexGeometry(vidroLateralPoints);
+    const paraChoquefInstanceGeometry =
+      new THREE.InstancedBufferGeometry().copy(paraChoquefConvex);
 
-      vidroLateral1 = new THREE.Mesh(vidroLateral1Convex, vidroMaterial);
-      vidroLateral1.translateZ(0.83);
-      vidroLateral1.translateY(0.96);
-      vidroLateral1.translateX(-0.7);
-      vidroLateral1.scale.set(scale4, scale4, scale4);
+    paraChoquef = new THREE.InstancedMesh(
+      paraChoquefConvex,
+      estruturaMaterial,
+      numInstances
+    );
+    base.add(paraChoquef);
+    paraChoquef.translateX(6);
+    paraChoquef.translateY(-1.1);
+    paraChoquef.translateZ(2.85);
+    paraChoquef.rotateX(THREE.MathUtils.degToRad(-90));
+    paraChoquef.castShadow = true;
+    const scale2 = 2;
+    paraChoquef.scale.set(scale2, scale2, scale2);
+    base.add(paraChoquef);
 
-      teto.add(vidroLateral1);
+    const matrixParaChoquef = new THREE.Matrix4();
+    const matrixParaChoquefArray = new Float32Array(numInstances * 16);
 
-      vidroTraseiroPoints = this.criaVidroTraseiro();
+    this.updateMatrixParaChoquef = () => {
+      for (let i = 0; i < numInstances; i++) {
+        matrixParaChoquef.identity();
+        matrixParaChoquef.setPosition(
+          paraChoquef.position.x,
+          paraChoquef.position.y,
+          paraChoquef.position.z
+        );
+        matrixParaChoquef.makeRotationFromEuler(
+          new THREE.Euler(
+            paraChoquef.rotation.x,
+            paraChoquef.rotation.y,
+            paraChoquef.rotation.z
+          )
+        );
+        matrixParaChoquefArray.set(matrixParaChoquef.elements * 16);
+      }
+    };
 
-      vidroTraseiroConvex = new ConvexGeometry(vidroTraseiroPoints);
+    this.updateMatrixParaChoquef();
 
-      vidroTraseiro = new THREE.Mesh(vidroTraseiroConvex, vidroMaterial);
+    paraChoquefInstanceGeometry.setAttribute(
+      "instanceMatrix",
+      new THREE.InstancedBufferAttribute(matrixParaChoquefArray, 16)
+    );
 
-      vidroTraseiro.scale.set(scale3, scale3, scale3);
-      vidroTraseiro.translateZ(0.95);
-      vidroTraseiro.translateX(-0.3);
-      vidroTraseiro.rotateX(THREE.MathUtils.degToRad(0));
-      vidroTraseiro.rotateY(THREE.MathUtils.degToRad(-11));
-      vidroTraseiro.rotateZ(THREE.MathUtils.degToRad(-90));
-      teto.add(vidroTraseiro);
+    vidroLateralConvex = this.criaVidroLateral();
+    vidroLateral1Convex = this.criaVidroLateral();
 
-      tampaTraseiraPoints = this.criaTampaTraseira();
+    const vidroLateralInstanceGeometry =
+      new THREE.InstancedBufferGeometry().copy(vidroLateralConvex);
+    const vidroLateral1InstanceGeometry =
+      new THREE.InstancedBufferGeometry().copy(vidroLateral1Convex);
 
-      tampaTraseiraConvex = new ConvexGeometry(tampaTraseiraPoints);
+    vidroLateral = new THREE.InstancedMesh(
+      vidroLateralConvex,
+      vidroMaterial,
+      numInstances
+    );
+    vidroLateral1 = new THREE.InstancedMesh(
+      vidroLateral1Convex,
+      vidroMaterial,
+      numInstances
+    );
 
-      tampaTraseira = new THREE.Mesh(tampaTraseiraConvex, tampaMaterial);
+    vidroLateral.translateZ(0.83);
+    vidroLateral.translateY(-0.96);
+    vidroLateral.translateX(-0.7);
+    const scale4 = 0.4;
+    vidroLateral.scale.set(scale4, scale4, scale4);
+
+    teto.add(vidroLateral);
+
+    const matrixVidroLateral = new THREE.Matrix4();
+    const matrixVidroLateralArray = new Float32Array(numInstances * 16);
+
+    this.updateMatrixVidroLateral = () => {
+      for (let i = 0; i < numInstances; i++) {
+        matrixVidroLateral.identity();
+        matrixVidroLateral.setPosition(
+          vidroLateral.position.x,
+          vidroLateral.position.y,
+          vidroLateral.position.z
+        );
+        matrixVidroLateral.makeRotationFromEuler(
+          new THREE.Euler(
+            vidroLateral.rotation.x,
+            vidroLateral.rotation.y,
+            vidroLateral.rotation.z
+          )
+        );
+        matrixVidroLateralArray.set(matrixVidroLateral.elements * 16);
+      }
+    };
+
+    vidroLateralInstanceGeometry.setAttribute(
+      "instanceMatrix",
+      new THREE.InstancedBufferAttribute(matrixVidroLateralArray, 16)
+    );
+
+    this.updateMatrixVidroLateral();
+
+    vidroLateral1.translateZ(0.83);
+    vidroLateral1.translateY(0.96);
+    vidroLateral1.translateX(-0.7);
+    vidroLateral1.scale.set(scale4, scale4, scale4);
+
+    teto.add(vidroLateral1);
+
+    const matrixVidroLateral1 = new THREE.Matrix4();
+    const matrixVidroLateral1Array = new Float32Array(numInstances * 16);
+
+    this.updateMatrixVidroLateral1 = () => {
+      for (let i = 0; i < numInstances; i++) {
+        matrixVidroLateral1.identity();
+        matrixVidroLateral1.setPosition(
+          vidroLateral1.position.x,
+          vidroLateral1.position.y,
+          vidroLateral1.position.z
+        );
+        matrixVidroLateral1.makeRotationFromEuler(
+          new THREE.Euler(
+            vidroLateral1.rotation.x,
+            vidroLateral1.rotation.y,
+            vidroLateral1.rotation.z
+          )
+        );
+        matrixVidroLateral1Array.set(matrixVidroLateral.elements * 16);
+      }
+    };
+
+    vidroLateral1InstanceGeometry.setAttribute(
+      "instanceMatrix",
+      new THREE.InstancedBufferAttribute(matrixVidroLateral1Array, 16)
+    );
+
+    this.updateMatrixVidroLateral1();
+
+    vidroTraseiroConvex = this.criaVidroTraseiro();
+
+    const vidroTraseiroInstanceGeometry =
+      new THREE.InstancedBufferGeometry().copy(vidroTraseiroConvex);
+
+    vidroTraseiro = new THREE.InstancedMesh(vidroTraseiroConvex, vidroMaterial, numInstances);
+
+    vidroTraseiro.scale.set(scale3, scale3, scale3);
+    vidroTraseiro.translateZ(0.95);
+    vidroTraseiro.translateX(-0.3);
+    vidroTraseiro.rotateX(THREE.MathUtils.degToRad(0));
+    vidroTraseiro.rotateY(THREE.MathUtils.degToRad(-11));
+    vidroTraseiro.rotateZ(THREE.MathUtils.degToRad(-90));
+    teto.add(vidroTraseiro);
+
+    const matrixVidroTraseiro = new THREE.Matrix4();
+    const matrixVidroTraseiroArray = new Float32Array(numInstances * 16);
+
+    this.updateMatrixVidroTraseiro = () => {
+      for (let i = 0; i < numInstances; i++) {
+        matrixVidroTraseiro.identity();
+        matrixVidroTraseiro.setPosition(
+          vidroTraseiro.position.x,
+          vidroTraseiro.position.y,
+          vidroTraseiro.position.z
+        );
+        matrixVidroTraseiro.makeRotationFromEuler(
+          new THREE.Euler(
+            vidroTraseiro.rotation.x,
+            vidroTraseiro.rotation.y,
+            vidroTraseiro.rotation.z
+          )
+        );
+        matrixVidroTraseiroArray.set(matrixVidroTraseiro.elements * 16);
+      }
+    };
+
+    this.updateMatrixVidroTraseiro();
+
+    vidroTraseiroInstanceGeometry.setAttribute(
+      "instanceMatrix",
+      new THREE.InstancedBufferAttribute(matrixVidroTraseiroArray, 16)
+    );
+
+      tampaTraseiraConvex = this.criaTampaTraseira();
+
+      const tampaTraseiraInstanceGeometry = new THREE.InstancedBufferGeometry().copy(tampaTraseiraConvex);
+      
+      tampaTraseira = new THREE.InstancedMesh(tampaTraseiraConvex, tampaMaterial, numInstances);
 
       tampaTraseira.scale.set(scale3, scale3, scale3);
       tampaTraseira.translateZ(0.72);
@@ -324,31 +581,74 @@ export class Carro {
       tampaTraseira.rotateY(THREE.MathUtils.degToRad(-11));
       tampaTraseira.rotateZ(THREE.MathUtils.degToRad(-90));
       teto.add(tampaTraseira);
+
+      const matrixTampaTraseira = new THREE.Matrix4();
+      const matrixTampaTraseiraArray = new Float32Array(numInstances * 16);
+
+      this.updateMatrixTampaTraseira = () => {
+        for (let i = 0; i < numInstances; i++) {
+          matrixTampaTraseira.identity();
+          matrixTampaTraseira.setPosition(
+            tampaTraseira.position.x,
+            tampaTraseira.position.y,
+            tampaTraseira.position.z
+          );
+          matrixTampaTraseira.makeRotationFromEuler(
+            new THREE.Euler(
+              tampaTraseira.rotation.x,
+              tampaTraseira.rotation.y,
+              tampaTraseira.rotation.z
+            )
+          );
+          matrixTampaTraseiraArray.set(matrixTampaTraseira.elements * 16);
+        }
+      };
+
+      this.updateMatrixTampaTraseira();
+
+      tampaTraseiraInstanceGeometry.setAttribute(
+        "instanceMatrix",
+        new THREE.InstancedBufferAttribute(matrixTampaTraseiraArray, 16)
+      );
+
+
+      this.updateConvexObject = function () {
+      tetoInstanceGeometry.getAttribute(
+        "instanceMatrix"
+      ).needsUpdate = true;
+      vidroFrenteInstanceGeometry.getAttribute(
+        "instanceMatrix"
+      ).needsUpdate = true;
+      paraChoquefInstanceGeometry.getAttribute(
+        "instanceMatrix"
+      ).needsUpdate = true;
+      vidroLateralInstanceGeometry.getAttribute(
+        "instanceMatrix"
+      ).needsUpdate = true;
+      vidroLateral1InstanceGeometry.getAttribute(
+        "instanceMatrix"
+      ).needsUpdate = true;
+      vidroTraseiroInstanceGeometry.getAttribute(
+        "instanceMatrix"
+      ).needsUpdate = true;
+      tampaTraseiraInstanceGeometry.getAttribute(
+        "instanceMatrix"
+      ).needsUpdate = true;
     };
-
-    this.updateConvexObject();
-
-    const eixo_frente = this.criarEixo();
-    base.add(eixo_frente);
 
     const eixo_tras = this.criarEixo();
     base.add(eixo_tras);
 
-    eixo_frente.rotateX(THREE.MathUtils.degToRad(90));
-    eixo_frente.translateZ(1);
-    eixo_frente.translateX(-4);
+    const eixo_frente = this.criarEixo();
+    base.add(eixo_frente);
 
     eixo_tras.rotateX(THREE.MathUtils.degToRad(90));
     eixo_tras.translateZ(1);
-    eixo_tras.translateX(3);
+    eixo_tras.translateX(-4);
 
-    const calota_frente_direita = this.criarCalota();
-    eixo_frente.add(calota_frente_direita);
-    calota_frente_direita.translateY(-3);
-
-    const calota_frente_esquerda = this.criarCalota();
-    eixo_frente.add(calota_frente_esquerda);
-    calota_frente_esquerda.translateY(3);
+    eixo_frente.rotateX(THREE.MathUtils.degToRad(90));
+    eixo_frente.translateZ(1);
+    eixo_frente.translateX(3);
 
     const calota_tras_direita = this.criarCalota();
     eixo_tras.add(calota_tras_direita);
@@ -358,13 +658,13 @@ export class Carro {
     eixo_tras.add(calota_tras_esquerda);
     calota_tras_esquerda.translateY(3);
 
-    const esfera_frente_direita = this.criarEsfera();
-    eixo_frente.add(esfera_frente_direita);
-    esfera_frente_direita.translateY(3);
+    const calota_frente_direita = this.criarCalota();
+    eixo_frente.add(calota_frente_direita);
+    calota_frente_direita.translateY(-3);
 
-    const esfera_frente_esquerda = this.criarEsfera();
-    eixo_frente.add(esfera_frente_esquerda);
-    esfera_frente_esquerda.translateY(-3);
+    const calota_frente_esquerda = this.criarCalota();
+    eixo_frente.add(calota_frente_esquerda);
+    calota_frente_esquerda.translateY(3);
 
     const esfera_tras_direita = this.criarEsfera();
     eixo_tras.add(esfera_tras_direita);
@@ -374,13 +674,13 @@ export class Carro {
     eixo_tras.add(esfera_tras_esquerda);
     esfera_tras_esquerda.translateY(-3);
 
-    const pneu_frente_direita = this.criarPneu();
-    calota_frente_direita.add(pneu_frente_direita);
-    pneu_frente_direita.rotateX(THREE.MathUtils.degToRad(90));
+    const esfera_frente_direita = this.criarEsfera();
+    eixo_frente.add(esfera_frente_direita);
+    esfera_frente_direita.translateY(3);
 
-    const pneu_frente_esquerda = this.criarPneu();
-    calota_frente_esquerda.add(pneu_frente_esquerda);
-    pneu_frente_esquerda.rotateX(THREE.MathUtils.degToRad(90));
+    const esfera_frente_esquerda = this.criarEsfera();
+    eixo_frente.add(esfera_frente_esquerda);
+    esfera_frente_esquerda.translateY(-3);
 
     const pneu_tras_direita = this.criarPneu();
     calota_tras_direita.add(pneu_tras_direita);
@@ -389,6 +689,16 @@ export class Carro {
     const pneu_tras_esquerda = this.criarPneu();
     calota_tras_esquerda.add(pneu_tras_esquerda);
     pneu_tras_esquerda.rotateX(THREE.MathUtils.degToRad(90));
+  
+
+    const pneu_frente_direita = this.criarPneu();
+    calota_frente_direita.add(pneu_frente_direita);
+    pneu_frente_direita.rotateX(THREE.MathUtils.degToRad(90));
+
+    const pneu_frente_esquerda = this.criarPneu();
+    calota_frente_esquerda.add(pneu_frente_esquerda);
+    pneu_frente_esquerda.rotateX(THREE.MathUtils.degToRad(90));
+    
 
     this.carro.position.set(inicial[0], inicial[1] + 0.475, inicial[2]);
 
@@ -398,14 +708,14 @@ export class Carro {
 
     this.scene.add(this.carro);
 
-    this.aceleracao = -0.0008;
+    this.aceleracao = 0.0008;
 
     this.velocidade = 0;
 
-    this.limiteVelocidade = -0.16;
+    this.limiteVelocidade = 0.16;
 
     this.acelerar = () => {
-      if (this.velocidade > this.limiteVelocidade) {
+      if (this.velocidade < this.limiteVelocidade) {
         this.velocidade += this.aceleracao;
         this.velocidade = Number(this.velocidade.toFixed(4));
       }
@@ -413,7 +723,7 @@ export class Carro {
     };
 
     this.desacelerar = () => {
-      if (this.velocidade < 0) {
+      if (this.velocidade > 0) {
         this.velocidade -= this.aceleracao;
         this.velocidade = Number(this.velocidade.toFixed(4));
       }
@@ -426,9 +736,9 @@ export class Carro {
     };
 
     this.re = () => {
-      if (this.velocidade < 0) this.freiar();
+      if (this.velocidade > 0) this.freiar();
       else {
-        if (this.velocidade <= -this.limiteVelocidade / 2.4) {
+        if (this.velocidade >= -this.limiteVelocidade / 2.4) {
           this.velocidade -= this.aceleracao;
           this.velocidade = Number(this.velocidade.toFixed(4));
         }
@@ -437,7 +747,7 @@ export class Carro {
     };
 
     this.desacelerarRe = () => {
-      if (this.velocidade > 0) {
+      if (this.velocidade < 0) {
         this.velocidade += this.aceleracao;
         this.velocidade = Number(this.velocidade.toFixed(4));
       }
@@ -462,12 +772,12 @@ export class Carro {
 
     this.penalidade = (pista) => {
       if (!this.estaNaPista(pista)) {
-        this.limiteVelocidade = -0.08;
-        if (this.velocidade < this.limiteVelocidade) {
+        this.limiteVelocidade = 0.08;
+        if (this.velocidade > this.limiteVelocidade) {
           this.velocidade = this.limiteVelocidade;
         }
       } else {
-        this.limiteVelocidade = -0.16;
+        this.limiteVelocidade = 0.16;
       }
     };
 
@@ -483,12 +793,12 @@ export class Carro {
       this.mm = 0;
     };
 
-    /*this.resetPos = () => {
-            this.carro.position.set(inicial[0], inicial[1]+0.475, inicial[2]);
+    this.resetPos = () => {
+            this.carro.position.set(this.inicial[0], this.inicial[1]+0.475, this.inicial[2]);
             this.carro.rotation.x = 0;
-            this.carro.rotation.y = 0;
+            this.carro.rotation.y = Math.PI;
             this.carro.rotation.z = 0;
-        }*/
+      }
 
     this.reset = () => {
       this.resetPos();
@@ -569,9 +879,10 @@ export class Carro {
     this.keyboardUpdate = (camMode) => {
       let angle = THREE.MathUtils.degToRad(5);
       let maxRotation = Math.PI / 6;
+      this.keyboard.update(camMode);
 
       if (camMode === 0 || camMode === 1) {
-        this.keyboard.update();
+        
 
         if (this.keyboard.pressed("X")) this.acelerar();
         else this.desacelerar();
@@ -579,15 +890,15 @@ export class Carro {
         else this.desacelerarRe();
 
         if (this.keyboard.pressed("left")) {
-          if (this.velocidade < 0) this.carro.rotateY(angle / 4);
-          else if (this.velocidade > 0) this.carro.rotateY(-angle / 4);
+          if (this.velocidade > 0) this.carro.rotateY(angle / 4);
+          else if (this.velocidade < 0) this.carro.rotateY(-angle / 4);
           if (calota_frente_direita.rotation.z >= -maxRotation) {
             calota_frente_direita.rotateZ(-angle / 2);
             calota_frente_esquerda.rotateZ(-angle / 2);
           }
         } else if (this.keyboard.pressed("right")) {
-          if (this.velocidade < 0) this.carro.rotateY(-angle / 4);
-          else if (this.velocidade > 0) this.carro.rotateY(angle / 4);
+          if (this.velocidade > 0) this.carro.rotateY(-angle / 4);
+          else if (this.velocidade < 0) this.carro.rotateY(angle / 4);
           if (calota_frente_direita.rotation.z <= maxRotation) {
             calota_frente_direita.rotateZ(angle / 2);
             calota_frente_esquerda.rotateZ(angle / 2);
@@ -609,20 +920,28 @@ export class Carro {
           pneu_frente_esquerda.rotateZ(1);
           pneu_tras_direita.rotateZ(1);
           pneu_tras_esquerda.rotateZ(1);
+          calota_frente_direita.rotation.y -= 0.1;
+          calota_frente_esquerda.rotation.y -= 0.1;
+          calota_tras_direita.rotation.y -= 0.1;
+          calota_tras_esquerda.rotation.y -= 0.1;
+        }else{
+          calota_frente_direita.rotation.y = 0;
+          calota_frente_esquerda.rotation.y = 0;
         }
-        if (this.keyboard.pressed("left")) {
+        if (this.keyboard.pressed("right")) {
           if (calota_frente_direita.rotation.z >= -maxRotation) {
             calota_frente_direita.rotateZ(-angle / 2);
             calota_frente_esquerda.rotateZ(-angle / 2);
           }
-        } else if (this.keyboard.pressed("right")) {
+        } else if (this.keyboard.pressed("left")) {
           if (calota_frente_direita.rotation.z <= maxRotation) {
             calota_frente_direita.rotateZ(angle / 2);
             calota_frente_esquerda.rotateZ(angle / 2);
           }
         } else {
-          if (calota_frente_direita.rotation.z != 0) {
+          if (calota_frente_direita.rotation.z.toFixed(1) != 0) {
             if (calota_frente_direita.rotation.z > 0) {
+              console.log(calota_frente_direita.rotation.z);
               calota_frente_direita.rotateZ(-angle / 2);
               calota_frente_esquerda.rotateZ(-angle / 2);
             } else {
@@ -632,14 +951,7 @@ export class Carro {
           }
         }
       }
-    }
-
-    this.render();
-
-    this.render = () => {
-        updateConvexObject();
-    }
-    
+    };
   }
 }
 // let scene, renderer, camera, material, light, orbit; // Initial variables
