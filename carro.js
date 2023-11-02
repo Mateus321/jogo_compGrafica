@@ -447,6 +447,11 @@ export class Carro {
         }
     }
 
+    this.render();
+
+    this.render = () => {
+        updateConvexObject();
+    }
 
 
 }

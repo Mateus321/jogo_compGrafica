@@ -1,5 +1,6 @@
 import * as THREE from  'three';
-import { Carro } from './carro.js';
+// import { Carro } from './carro.js';
+import { Carro } from './cybertruckobj.js';
 import {Pista, listaPistas} from './pistaarray.js';
 import {TrackballControls} from '../build/jsm/controls/TrackballControls.js';
 import { OrbitControls } from '../build/jsm/controls/OrbitControls.js';
@@ -382,6 +383,7 @@ function render()
   keyboardUpdate();
   
   requestAnimationFrame(render);
+  
   switch(camMode){
     // trackballControls.update();
     // trackballControls.target.copy(carro.carro.position);
