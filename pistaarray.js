@@ -7,6 +7,7 @@ import {initRenderer,
         InfoBox,
         onWindowResize,
         createGroundPlaneXZ} from "../libs/util/util.js";
+import setMaterial from './main.js';
 
 // Listen window size changes
 
@@ -167,12 +168,17 @@ export class Pista {
     this.proximoCheckpoint = 0;
                    
 
-    const materialInicial = new THREE.MeshPhongMaterial( {color: 0xe85907});
+    // const materialInicial = new THREE.MeshPhongMaterial( {color: 0xe85907});
+    const materialInicial = setMaterial('../assets/textures/start.jpg', 0.3, 0.3);
 
     const cubeGeometry = new THREE.BoxGeometry(10, 0.3, 10);
 
 
     const material = new THREE.MeshPhongMaterial({color: 0x262729});
+    const texturasPista = [setMaterial('../assets/textures/cement.jpg', 2, 4),
+    setMaterial('../assets/textures/asfalto.jpg', 2, 4),
+    setMaterial('../assets/textures/Pebbles/Pebbles_002_COLOR.jpg', 2, 4),
+    setMaterial('../assets/textures/NormalMapping/brickwall.jpg', 4, 2)];
 
     this.pista = new THREE.Object3D();
 
@@ -183,7 +189,7 @@ export class Pista {
           bloco.receiveShadow = true;
           this.pista.add(bloco);
         }else{
-          let bloco = new THREE.Mesh(cubeGeometry, material);
+          let bloco = new THREE.Mesh(cubeGeometry, texturasPista[this.id - 1]);
           bloco.position.set(element[0],element[1],element[2]);
           bloco.receiveShadow = true;
           this.pista.add(bloco);

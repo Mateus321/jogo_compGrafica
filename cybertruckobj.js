@@ -48,23 +48,45 @@ const numInstances = 100;
 
 // create the ground plane
 // scene.add(plane);
-var estruturaMaterial = new THREE.MeshPhongMaterial({
-  color: 0x636d73,
-  opacity: objOpacity,
-  transparent: false,
-});
+let loader = new THREE.TextureLoader();
+function setMaterial(file, repeatU = 1, repeatV = 1, color = 'rgb(255,255,255)'){
+  let mat = new THREE.MeshBasicMaterial({ map: loader.load(file), color:color});
+  mat.map.wrapS = mat.map.wrapT = THREE.RepeatWrapping;
+  mat.map.minFilter = mat.map.magFilter = THREE.LinearFilter;
+  mat.map.repeat.set(repeatU,repeatV); 
+  return mat;
+}
 
-var vidroMaterial = new THREE.MeshPhongMaterial({
-  color: 0x1f2224,
-  opacity: objOpacity,
-  transparent: true,
-});
+// var estruturaMaterial = new THREE.MeshPhongMaterial({
+//   color: 0x636d73,
+//   opacity: objOpacity,
+//   transparent: false,
+// });
+
+let estruturaMaterial = setMaterial('../assets/textures/metalPreto.avif', 0.2, 1);
+
+const uvTeto = [
+  0, 0, 
+  1, 0,
+  1, 1,
+  1, 1,
+  0, 1
+  ];
+  
+// var vidroMaterial = new THREE.MeshPhongMaterial({
+//   color: 0x1f2224,
+//   opacity: objOpacity,
+//   transparent: true,
+// });
+
+let vidroMaterial = setMaterial('../assets/textures/vidrocarro.avif', 1,1);
 
 var tampaMaterial = new THREE.MeshLambertMaterial({
-  color: 0x1e1e1e,
-  opacity: 0.1,
-  transparent: true,
-});
+   color: 0x1e1e1e,
+   opacity: 0.1,
+   transparent: true,
+ });
+
 
 function updateObject(mesh)
 {
@@ -165,7 +187,7 @@ export class Carro {
 
     this.criarCalota = function () {
       const calotaS = new THREE.CylinderGeometry(0.8, 0.8, 0.6, 8);
-      const material_calota = new THREE.MeshLambertMaterial({ color: 0xe3efdf });
+      const material_calota = setMaterial('../assets/textures/metal.jpg', 0.2, 1);
       const calota = new THREE.Mesh(calotaS, material_calota);
       return calota;
     };
@@ -331,6 +353,8 @@ export class Carro {
       "instanceMatrix",
       new THREE.InstancedBufferAttribute(matrixTetoArray, 16)
     );
+
+    tetoInstanceGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvTeto , 0.2));
 
     vidroFrenteConvex = this.criaVidroFrente();
 

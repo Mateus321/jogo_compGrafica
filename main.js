@@ -79,8 +79,54 @@ let camMode = 0; // camera 0 - normal, camera 1 - 3a pessoa, camera 2 - inspeÃ§Ã
 // Listen window size changes
 window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
 
+export default function setMaterial(file, repeatU = 1, repeatV = 1, color = 'rgb(255,255,255)'){
+  let mat = new THREE.MeshBasicMaterial({ map: loader.load(file), color:color});
+  mat.map.wrapS = mat.map.wrapT = THREE.RepeatWrapping;
+  mat.map.minFilter = mat.map.magFilter = THREE.LinearFilter;
+  mat.map.repeat.set(repeatU,repeatV); 
+  return mat;
+}
+
+let loader = new THREE.TextureLoader();
+function createGroundPlane(width, height, widthSegments = 10, heightSegments = 10, gcolor = null) {
+  if (!gcolor) gcolor = "rgb(200,200,200)";
+  let planeGeometry = new THREE.PlaneGeometry(width, height, widthSegments, heightSegments);
+  let planeMaterial =  [setMaterial('../assets/textures/grass.jpg',4,4),
+  setMaterial('../assets/textures/intertravado.jpg',30,30), //y-  Just a color
+  setMaterial('../assets/textures/sand.jpg',30,30), //z+
+  setMaterial('../assets/textures/sun.jpg',3,3) //z- //y+
+  ];
+  let mat4 = new THREE.Matrix4(); // Aux mat4 matrix   
+  let plane;
+  switch(pistaEscolhida){
+    case 0:
+    plane = new THREE.Mesh(planeGeometry, planeMaterial[0]);
+    break;
+    case 1:
+    plane = new THREE.Mesh(planeGeometry, planeMaterial[1]);
+    break;
+    case 2:
+    plane = new THREE.Mesh(planeGeometry, planeMaterial[2]);
+    break;
+    case 3:
+    plane = new THREE.Mesh(planeGeometry, planeMaterial[3]);
+    break;
+  }
+  plane.receiveShadow = true;
+  // Rotate 90 in X and perform a small translation in Y
+  plane.matrixAutoUpdate = false;
+  plane.matrix.identity();    // resetting matrices
+  // Will execute R1 and then T1
+  plane.matrix.multiply(mat4.makeTranslation(0.0, -0.1, 0.0)); // T1   
+  plane.matrix.multiply(mat4.makeRotationX(-Math.PI/2)); // R1   
+
+  return plane;
+}
+
 // Show axes (parameter is size of each axis)
-let plane = createGroundPlaneXZ(225, 225);
+let planeSize = 225;
+let plane = createGroundPlane(planeSize, planeSize);
+
 scene.add(plane);
 
 
@@ -205,6 +251,11 @@ const trocaPista = () => {
   if(pista){
     pista.removePista();
   }
+  if(plane){
+    scene.remove(plane);
+  }
+  plane = createGroundPlane(planeSize, planeSize);
+  scene.add(plane);
   const novaPista = new Pista(listaPistas[pistaEscolhida].id, listaPistas[pistaEscolhida].posicoes, listaPistas[pistaEscolhida].checkpoints, scene);
   let inicial = novaPista.getInicial();
   carro.inicial = inicial;
