@@ -1,22 +1,19 @@
-import * as THREE from 'three';
+import * as THREE from  'three';
 import { OrbitControls } from '../build/jsm/controls/OrbitControls.js';
 import { Pista } from './pistaarray.js';
 
-import {
-    initRenderer,
-    initCamera,
-    initDefaultBasicLight,
-    setDefaultMaterial,
-    InfoBox,
-    SecondaryBox,
-    onWindowResize,
-    createGroundPlaneXZ
-} from "../libs/util/util.js";
+import {initRenderer, 
+        initCamera,
+        initDefaultBasicLight,
+        setDefaultMaterial,
+        InfoBox,
+        SecondaryBox,        
+        onWindowResize, 
+        createGroundPlaneXZ} from "../libs/util/util.js";
 
 // Listen window size changes
 
 // Use to scale the cube
-var scale = 1.0;
 
 // Show text information onscreen
 
@@ -53,52 +50,52 @@ export class Carro {
         this.ssV = 0;
         this.tempoV = [''];
 
-        this.criaChassi = function () {
+        this.criaChassi = function(){
             let caixa = new THREE.BoxGeometry(10, 2, 5);
-            const material_carro = new THREE.MeshPhongMaterial({ color: 0xF0130A });
+            const material_carro = new THREE.MeshPhongMaterial( {color: 0xF0130A });
             let chassi = new THREE.Mesh(caixa, material_carro);
             chassi.castShadow = true;
             return chassi;
         }
 
-        this.criarEixo = function () {
-            const eixosC = new THREE.CylinderGeometry(0.5, 0.5, 6, 24);
-            const material_eixos = new THREE.MeshPhongMaterial({ color: 0xCCCCCC });
+        this.criarEixo = function (){
+            const eixosC = new THREE.CylinderGeometry( 0.5, 0.5, 6, 24 );
+            const material_eixos = new THREE.MeshPhongMaterial( { color: 0xCCCCCC } ); 
             const eixo = new THREE.Mesh(eixosC, material_eixos);
-
+            
             return eixo;
         }
 
         this.criarEsfera = () => {
             const geometria_esfera = new THREE.SphereGeometry(0.6, 32, 16);
-            const material_esfera = new THREE.MeshPhongMaterial({ color: 0xE3EFDF })
+            const material_esfera = new THREE.MeshPhongMaterial ( {color: 0xE3EFDF })
             const esfera = new THREE.Mesh(geometria_esfera, material_esfera);
             return esfera;
         }
 
-        this.criarCalota = function () {
-            const calotaS = new THREE.CylinderGeometry(0.5, 0.1, 0.2, 24);
-            const material_calota = new THREE.MeshPhongMaterial({ color: 0xE3EFDF });
+        this.criarCalota = function (){
+            const calotaS = new THREE.CylinderGeometry(0.5, 0.1, 0.2, 24); 
+            const material_calota = new THREE.MeshPhongMaterial({color: 0xE3EFDF });
             const calota = new THREE.Mesh(calotaS, material_calota);
             return calota;
         }
-        this.criarPneu = function () {
-            const rodas = new THREE.TorusGeometry(0.8, 0.4, 16, 50);
-            const material_rodas = new THREE.MeshPhongMaterial({ color: 0x000 });
+        this.criarPneu = function(){
+            const rodas = new THREE.TorusGeometry( 0.8, 0.4, 16, 50 ); 
+            const material_rodas = new THREE.MeshPhongMaterial( { color: 0x000 } );
             const roda = new THREE.Mesh(rodas, material_rodas);
             return roda;
         }
 
         this.criaAerofolio = () => {
-            const geometria_aerofolio = new THREE.BoxGeometry(1, 0.8, 7);
-            const material_aerofolio = new THREE.MeshPhongMaterial({ color: 0XF0130A });
+            const geometria_aerofolio = new THREE.BoxGeometry (1,0.8,7);
+            const material_aerofolio = new THREE.MeshPhongMaterial ( {color: 0XF0130A });
             const aerofolio = new THREE.Mesh(geometria_aerofolio, material_aerofolio);
             return aerofolio;
         }
 
         this.criaFarol = () => {
             const geometria_farol = new THREE.CylinderGeometry(0.4, 0.4, 0.2, 24);
-            const material_farol = new THREE.MeshPhongMaterial({ color: 0xfff87a })
+            const material_farol = new THREE.MeshPhongMaterial({ color: 0xfff87a})
             const farol = new THREE.Mesh(geometria_farol, material_farol);
             return farol
         }
@@ -129,14 +126,14 @@ export class Carro {
 
         const farol_direito = this.criaFarol();
         this.carro.add(farol_direito);
-        farol_direito.rotateZ(Math.PI / 2);
+        farol_direito.rotateZ(Math.PI/2);
         farol_direito.translateY(5);
         farol_direito.translateZ(-1.6);
         farol_direito.translateX(0.3);
 
         const farol_esquerdo = this.criaFarol();
         this.carro.add(farol_esquerdo);
-        farol_esquerdo.rotateZ(Math.PI / 2);
+        farol_esquerdo.rotateZ(Math.PI/2);
         farol_esquerdo.translateY(5);
         farol_esquerdo.translateZ(1.6);
         farol_esquerdo.translateX(0.3);
@@ -204,43 +201,43 @@ export class Carro {
         calota_tras_esquerda.add(pneu_tras_esquerda);
         pneu_tras_esquerda.rotateX(THREE.MathUtils.degToRad(90));
 
-        this.carro.position.set(this.inicial[0], this.inicial[1] + 0.445, this.inicial[2]);
-        this.carro.scale.set(0.15, 0.15, 0.15);
+        this.carro.position.set(this.inicial[0], this.inicial[1]+0.475, this.inicial[2]);
+        this.carro.scale.set(0.15,0.15,0.15);
 
         this.scene.add(this.carro);
 
         this.aceleracao = -0.0008;
-
+        
         this.velocidade = 0;
 
         this.limiteVelocidade = -0.16;
 
-        this.acelerar = () => {
-            if (this.velocidade > this.limiteVelocidade) {
+        this.acelerar = () =>{
+            if(this.velocidade > this.limiteVelocidade){
                 this.velocidade += this.aceleracao;
                 this.velocidade = Number(this.velocidade.toFixed(4));
             }
             this.carro.translateX(this.velocidade);
         }
 
-        this.desacelerar = () => {
-            if (this.velocidade < 0) {
+        this.desacelerar = () =>{
+            if(this.velocidade < 0){
                 this.velocidade -= this.aceleracao;
                 this.velocidade = Number(this.velocidade.toFixed(4));
-            }
+                }
             this.carro.translateX(this.velocidade);
         }
 
         this.freiar = () => {
-            this.velocidade -= this.aceleracao * 3;
-            this.velocidade = Number(this.velocidade.toFixed(4));
+         this.velocidade -= this.aceleracao*3;
+         this.velocidade = Number(this.velocidade.toFixed(4));
         }
-
+        
 
         this.re = () => {
-            if (this.velocidade < 0) this.freiar();
-            else {
-                if (this.velocidade <= -this.limiteVelocidade / 2.4) {
+            if(this.velocidade < 0) this.freiar();
+            else{
+                if(this.velocidade <= -this.limiteVelocidade/2.4){
                     this.velocidade -= this.aceleracao;
                     this.velocidade = Number(this.velocidade.toFixed(4));
                 }
@@ -249,37 +246,37 @@ export class Carro {
         }
 
         this.desacelerarRe = () => {
-            if (this.velocidade > 0) {
+            if(this.velocidade > 0){
                 this.velocidade += this.aceleracao;
                 this.velocidade = Number(this.velocidade.toFixed(4));
-            }
+                }
             this.carro.translateX(this.velocidade);
         }
 
         this.estaNaPista = (pista) => {
             let posicoesVector3 = []
-            for (let i = 0; i < pista.pista.children.length; i++) {
+            for(let i = 0; i < pista.pista.children.length; i++){
                 posicoesVector3[i] = pista.pista.children[i].position;
                 let carroNaPista = posicoesVector3.some((posicaoVector3) => {
                     const distanciaLimite = 7;
                     let distancia = this.carro.position.distanceTo(posicaoVector3);
                     return distancia < distanciaLimite
                 });
-                if (carroNaPista) {
+                if(carroNaPista){
                     return true;
-
-                }
+                    
+                } 
             }
-            return false;
+            return false;  
         }
 
         this.penalidade = (pista) => {
-            if (!this.estaNaPista(pista)) {
-                this.limiteVelocidade = -0.08;
-                if (this.velocidade < this.limiteVelocidade) {
-                    this.velocidade = this.limiteVelocidade;
-                }
-            } else {
+            if(!this.estaNaPista(pista)){
+            this.limiteVelocidade = -0.08;
+            if(this.velocidade < this.limiteVelocidade){
+                this.velocidade = this.limiteVelocidade;
+            }
+            }else{
                 this.limiteVelocidade = -0.16;
             }
         }
@@ -297,7 +294,7 @@ export class Carro {
         }
 
         this.resetPos = () => {
-            this.carro.position.set(this.inicial[0], this.inicial[1] + 0.475, this.inicial[2]);
+            this.carro.position.set(this.inicial[0], this.inicial[1]+0.475, this.inicial[2]);
             this.carro.rotation.x = 0;
             this.carro.rotation.y = 0;
             this.carro.rotation.z = 0;
@@ -313,144 +310,109 @@ export class Carro {
             this.ss = 0;
             this.mm = 0;
             this.start();
-        }
-
+        }   
+        
         this.start = () => {
-            this.cron = setInterval(() => { this.time() }, this.temp);
-        }
+            this.cron = setInterval(() => {this.time()}, this.temp);
+        } 
 
-        this.time = () => {
+        this.time = ( ) => {
             this.ms++;
-
-            if (this.ms == 60) {
-                this.ms = 0;
-                this.ss++;
-                if (this.ss == 60) {
-                    this.ss = 0;
-                    this.mm++;
-
-                }
+          
+            if(this.ms == 60)
+            {
+              this.ms = 0;
+              this.ss++;
+              if(this.ss == 60){
+                this.ss = 0;
+                this.mm++;
+                
+              }
             }
-
+            
             let format = (this.mm < 10 ? '0' + this.mm : this.mm) + ':' + (this.ss < 10 ? '0' + this.ss : this.ss) + ':' + (this.ms < 10 ? '0' + this.ms : this.ms);
-
+            
             this.tempo[0] = format;
-        }
+          }
 
-        this.resetVolta = () => {
+          this.resetVolta = () => {
             clearInterval(this.cronVolta);
             this.msV = 0;
             this.ssV = 0;
             this.mmV = 0;
-            this.startVolta();
-        }
-
+            this.startVolta(); 
+        }   
+        
         this.startVolta = () => {
-            this.cronVolta = setInterval(() => { this.timeVolta() }, this.tempVolta);
-        }
+            this.cronVolta = setInterval(() => {this.timeVolta()}, this.tempVolta);
+        } 
 
-        this.timeVolta = () => {
+        this.timeVolta = ( ) => {
             this.msV++;
-
-            if (this.msV == 60) {
-                this.msV = 0;
-                this.ssV++;
-                if (this.ssV == 60) {
-                    this.ssV = 0;
-                    this.mmV++;
-
-                }
+          
+            if(this.msV == 60)
+            {
+              this.msV = 0;
+              this.ssV++;
+              if(this.ssV == 60){
+                this.ssV = 0;
+                this.mmV++;
+                
+              }
             }
-
+            
             let formatV = (this.mmV < 10 ? '0' + this.mmV : this.mmV) + ':' + (this.ssV < 10 ? '0' + this.ssV : this.ssV) + ':' + (this.msV < 10 ? '0' + this.msV : this.msV);
-
+            
             this.tempoV[0] = formatV;
-        }
+          }
 
+        
 
-
-        this.keyboardUpdate = (camMode) => {
-
+        this.keyboardUpdate = () => {
 
             let angle = THREE.MathUtils.degToRad(5);
             let maxRotation = Math.PI / 6;
 
-            if (camMode === 0 || camMode === 1) {
-
-
-                
-
-                this.keyboard.update();
-
-                if (this.keyboard.pressed("X")) this.acelerar();
-                else this.desacelerar();
-                if (this.keyboard.pressed("down")) this.re();
-                else this.desacelerarRe();
-
-                if (this.keyboard.pressed("left")) {
-                    if (this.velocidade < 0) this.carro.rotateY(angle / 4);
-                    else if (this.velocidade > 0) this.carro.rotateY(-angle / 4);
-                    if (calota_frente_direita.rotation.z >= -maxRotation) {
-                        calota_frente_direita.rotateZ(-angle / 2);
-                        calota_frente_esquerda.rotateZ(-angle / 2);
+            this.keyboard.update();
+          
+            if ( this.keyboard.pressed("X") ) this.acelerar();
+            else this.desacelerar();
+            if ( this.keyboard.pressed("down") )  this.re();
+            else this.desacelerarRe();
+          
+            if ( this.keyboard.pressed("left") ){ 
+                if(this.velocidade < 0) this.carro.rotateY(  angle/4 );
+                else if(this.velocidade > 0) this.carro.rotateY( -angle/4 );
+                if(calota_frente_direita.rotation.z >= -maxRotation){
+                calota_frente_direita.rotateZ(-angle/2);
+                calota_frente_esquerda.rotateZ(-angle/2);
+                }
+            }  
+            else if ( this.keyboard.pressed("right") ){
+                if(this.velocidade < 0) this.carro.rotateY( -angle/4 );
+                else if(this.velocidade > 0) this.carro.rotateY( angle/4 );
+                if(calota_frente_direita.rotation.z <= maxRotation){
+                calota_frente_direita.rotateZ(angle/2);
+                calota_frente_esquerda.rotateZ(angle/2);
+                }
+            }else{
+                if(calota_frente_direita.rotation.z != 0){
+                    if(calota_frente_direita.rotation.z > 0){
+                        calota_frente_direita.rotateZ(-angle/2);
+                        calota_frente_esquerda.rotateZ(-angle/2);
+                    }else{
+                        calota_frente_direita.rotateZ(angle/2);
+                        calota_frente_esquerda.rotateZ(angle/2);
                     }
                 }
-                else if (this.keyboard.pressed("right")) {
-                    if (this.velocidade < 0) this.carro.rotateY(-angle / 4);
-                    else if (this.velocidade > 0) this.carro.rotateY(angle / 4);
-                    if (calota_frente_direita.rotation.z <= maxRotation) {
-                        calota_frente_direita.rotateZ(angle / 2);
-                        calota_frente_esquerda.rotateZ(angle / 2);
-                    }
-                } else {
-                    if (calota_frente_direita.rotation.z != 0) {
-                        if (calota_frente_direita.rotation.z > 0) {
-                            calota_frente_direita.rotateZ(-angle / 2);
-                            calota_frente_esquerda.rotateZ(-angle / 2);
-                        } else {
-                            calota_frente_direita.rotateZ(angle / 2);
-                            calota_frente_esquerda.rotateZ(angle / 2);
-                        }
-                    }
-                }
-            } else if (camMode === 2) {
-                if(this.keyboard.pressed("X")){
-                    pneu_frente_direita.rotateZ(1);
-                    pneu_frente_esquerda.rotateZ(1);
-                    pneu_tras_direita.rotateZ(1);
-                    pneu_tras_esquerda.rotateZ(1);
-                }
-                if (this.keyboard.pressed("left")) {
-                    if (calota_frente_direita.rotation.z >= -maxRotation) {
-                        calota_frente_direita.rotateZ(-angle / 2);
-                        calota_frente_esquerda.rotateZ(-angle / 2);
-                    }
-                }
-                else if (this.keyboard.pressed("right")) {
-                    if (calota_frente_direita.rotation.z <= maxRotation) {
-                        calota_frente_direita.rotateZ(angle / 2);
-                        calota_frente_esquerda.rotateZ(angle / 2);
-                    }
-                } else {
-                    if (calota_frente_direita.rotation.z != 0) {
-                        if (calota_frente_direita.rotation.z > 0) {
-                            calota_frente_direita.rotateZ(-angle / 2);
-                            calota_frente_esquerda.rotateZ(-angle / 2);
-                        } else {
-                            calota_frente_direita.rotateZ(angle / 2);
-                            calota_frente_esquerda.rotateZ(angle / 2);
-                        }
-                    }
-                
             }
-
-        }
+          }   
     }
 
 
 
 }
-}
+        
 
 
 

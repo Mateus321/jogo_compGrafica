@@ -7,6 +7,7 @@ import {initRenderer,
         InfoBox,
         onWindowResize,
         createGroundPlaneXZ} from "../libs/util/util.js";
+import setMaterial from './main.js';
 
 // Listen window size changes
 
@@ -167,32 +168,37 @@ export class Pista {
     this.proximoCheckpoint = 0;
                    
 
-    const materialInicial = new THREE.MeshPhongMaterial( {color: 0xe85907});
+    // const materialInicial = new THREE.MeshPhongMaterial( {color: 0xe85907});
+    const materialInicial = setMaterial('../assets/textures/start.jpg', 0.3, 0.3);
 
     const cubeGeometry = new THREE.BoxGeometry(10, 0.3, 10);
 
 
     const material = new THREE.MeshPhongMaterial({color: 0x262729});
+    const texturasPista = [setMaterial('../assets/textures/cement.jpg', 2, 4),
+    setMaterial('../assets/textures/asfalto.jpg', 2, 4),
+    setMaterial('../assets/textures/Pebbles/Pebbles_002_COLOR.jpg', 2, 4),
+    setMaterial('../assets/textures/NormalMapping/brickwall.jpg', 4, 2)];
 
     this.pista = new THREE.Object3D();
 
-      this.posicoes.forEach((element, index) => {
-        if(index == 0){
-          let bloco = new THREE.Mesh(cubeGeometry, materialInicial);
-          bloco.position.set(element[0],element[1],element[2]);
-          bloco.receiveShadow = true;
-          this.pista.add(bloco);
-        }else{
-          let bloco = new THREE.Mesh(cubeGeometry, material);
-          bloco.position.set(element[0],element[1],element[2]);
-          bloco.receiveShadow = true;
-          this.pista.add(bloco);
-        }
-      });
-
-      this.getInicial = () => {
-        return this.posicoes[0];
+    this.posicoes.forEach((element, index) => {
+      if(index == 0){
+        let bloco = new THREE.Mesh(cubeGeometry, materialInicial);
+        bloco.position.set(element[0],element[1],element[2]);
+        bloco.receiveShadow = true;
+        this.pista.add(bloco);
+      }else{
+        let bloco = new THREE.Mesh(cubeGeometry, texturasPista[this.id - 1]);
+        bloco.position.set(element[0],element[1],element[2]);
+        bloco.receiveShadow = true;
+        this.pista.add(bloco);
       }
+    });
+
+    this.getInicial = () => {
+      return this.posicoes[0];
+    }
       
     this.scene.add(this.pista);
 
@@ -225,6 +231,35 @@ export class Pista {
         return carro.checkpointsVisitados.includes(checkpoint);
       })
     }
+    
+    var faceArray = [];
+    var textureFront = new THREE.TextureLoader().load( '../assets/textures/cube/Bridge/negz.jpg');
+    var textureBack = new THREE.TextureLoader().load( '../assets/textures/cube/Bridge/posz.jpg');
+    var textureTop = new THREE.TextureLoader().load( '../assets/textures/cube/Bridge/posy.jpg');
+    textureTop.rotation = THREE.MathUtils.degToRad(-90);
+    textureTop.center = new THREE.Vector2(0.5, 0.5);
+    var textureBottom = new THREE.TextureLoader().load( '../assets/textures/cube/Bridge/negy.jpg');
+    textureBottom.rotation = THREE.MathUtils.degToRad(-90);
+    textureBottom.center = new THREE.Vector2(0.5, 0.5);
+    var textureRight = new THREE.TextureLoader().load( '../assets/textures/cube/Bridge/posx.jpg');
+    var textureLeft = new THREE.TextureLoader().load( '../assets/textures/cube/Bridge/negx.jpg');
+      
+    faceArray.push(new THREE.MeshBasicMaterial( { map: textureFront }));
+    faceArray.push(new THREE.MeshBasicMaterial( { map: textureBack }));
+    faceArray.push(new THREE.MeshBasicMaterial( { map: textureTop }));
+    faceArray.push(new THREE.MeshBasicMaterial( { map: textureBottom }));
+    faceArray.push(new THREE.MeshBasicMaterial( { map: textureRight }));
+    faceArray.push(new THREE.MeshBasicMaterial( { map: textureLeft }));
+       
+    for (var i = 0; i < 6; i++)
+      faceArray[i].side = THREE.BackSide;
+       
+    var skyboxGeometry = new THREE.BoxGeometry( 1000, 1000, 1000);
+    var skybox = new THREE.Mesh( skyboxGeometry, faceArray );
+    // skybox.rotateX(degreesToRadians(90));
+    scene.add( skybox );
+
+
   }
 }
 

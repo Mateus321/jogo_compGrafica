@@ -1,5 +1,6 @@
 import * as THREE from  'three';
-import { Carro } from './carro.js';
+// import { Carro } from './carro.js';
+import { Carro } from './cybertruckobj.js';
 import {Pista, listaPistas} from './pistaarray.js';
 import {TrackballControls} from '../build/jsm/controls/TrackballControls.js';
 import { OrbitControls } from '../build/jsm/controls/OrbitControls.js';
@@ -78,8 +79,54 @@ let camMode = 0; // camera 0 - normal, camera 1 - 3a pessoa, camera 2 - inspeÃ§Ã
 // Listen window size changes
 window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
 
+export default function setMaterial(file, repeatU = 1, repeatV = 1, color = 'rgb(255,255,255)'){
+  let mat = new THREE.MeshBasicMaterial({ map: loader.load(file), color:color});
+  mat.map.wrapS = mat.map.wrapT = THREE.RepeatWrapping;
+  mat.map.minFilter = mat.map.magFilter = THREE.LinearFilter;
+  mat.map.repeat.set(repeatU,repeatV); 
+  return mat;
+}
+
+let loader = new THREE.TextureLoader();
+function createGroundPlane(width, height, widthSegments = 10, heightSegments = 10, gcolor = null) {
+  if (!gcolor) gcolor = "rgb(200,200,200)";
+  let planeGeometry = new THREE.PlaneGeometry(width, height, widthSegments, heightSegments);
+  let planeMaterial =  [setMaterial('../assets/textures/grass.jpg',4,4),
+  setMaterial('../assets/textures/intertravado.jpg',30,30), //y-  Just a color
+  setMaterial('../assets/textures/sand.jpg',30,30), //z+
+  setMaterial('../assets/textures/sun.jpg',3,3) //z- //y+
+  ];
+  let mat4 = new THREE.Matrix4(); // Aux mat4 matrix   
+  let plane;
+  switch(pistaEscolhida){
+    case 0:
+    plane = new THREE.Mesh(planeGeometry, planeMaterial[0]);
+    break;
+    case 1:
+    plane = new THREE.Mesh(planeGeometry, planeMaterial[1]);
+    break;
+    case 2:
+    plane = new THREE.Mesh(planeGeometry, planeMaterial[2]);
+    break;
+    case 3:
+    plane = new THREE.Mesh(planeGeometry, planeMaterial[3]);
+    break;
+  }
+  plane.receiveShadow = true;
+  // Rotate 90 in X and perform a small translation in Y
+  plane.matrixAutoUpdate = false;
+  plane.matrix.identity();    // resetting matrices
+  // Will execute R1 and then T1
+  plane.matrix.multiply(mat4.makeTranslation(0.0, -0.1, 0.0)); // T1   
+  plane.matrix.multiply(mat4.makeRotationX(-Math.PI/2)); // R1   
+
+  return plane;
+}
+
 // Show axes (parameter is size of each axis)
-let plane = createGroundPlaneXZ(225, 225);
+let planeSize = 225;
+let plane = createGroundPlane(planeSize, planeSize);
+
 scene.add(plane);
 
 
@@ -143,7 +190,7 @@ volta4Message.box.style.bottom = "72%";
 volta4Message.box.style.left = "2%";
 
 function updateVelocidadeMessage(){
-  let str = "Velocidade: " + (0 - Number(carro.velocidade * 200).toFixed(3)) + "   m/s"; 
+  let str = "Velocidade: " + (Number(carro.velocidade * 200).toFixed(3)) + "   m/s"; 
   velocidadeMessage.changeMessage(str);
 }
 
@@ -204,6 +251,11 @@ const trocaPista = () => {
   if(pista){
     pista.removePista();
   }
+  if(plane){
+    scene.remove(plane);
+  }
+  plane = createGroundPlane(planeSize, planeSize);
+  scene.add(plane);
   const novaPista = new Pista(listaPistas[pistaEscolhida].id, listaPistas[pistaEscolhida].posicoes, listaPistas[pistaEscolhida].checkpoints, scene);
   let inicial = novaPista.getInicial();
   carro.inicial = inicial;
@@ -255,7 +307,7 @@ const keyboardUpdate = () => {
     pistaEscolhida = 0;
     pista = trocaPista();
     carro.tempo.length = 0;
-    carro.aceleracao = -0.0008;
+    carro.aceleracao = 0.0008;
   }
   if(keyboard.down("2")){
     if(pistaEscolhida != 1){
@@ -264,7 +316,7 @@ const keyboardUpdate = () => {
     pistaEscolhida = 1;
     pista = trocaPista();
     carro.tempo.length = 0;
-    carro.aceleracao = -0.0008;
+    carro.aceleracao = 0.0008;
   } 
   if(keyboard.down("3")){
     if(pistaEscolhida != 2){
@@ -272,9 +324,9 @@ const keyboardUpdate = () => {
     }
     pistaEscolhida = 2;
     pista = trocaPista();
-    carro.carro.rotation.y = -Math.PI/2;
+    carro.carro.rotation.y = Math.PI/2;
     carro.tempo.length = 0;
-    carro.aceleracao = -0.0008;
+    carro.aceleracao = 0.0008;
   } 
   if(keyboard.down("4")){
     if(pistaEscolhida != 3){
@@ -283,7 +335,7 @@ const keyboardUpdate = () => {
     pistaEscolhida = 3;
     pista = trocaPista();
     carro.tempo.length = 0;
-    carro.aceleracao = -0.0008;
+    carro.aceleracao = 0.0008;
   } 
 }
 
@@ -305,7 +357,7 @@ function updateCamera3rdLookAt(){
 function updateCamera3rdPosition(){
   let matrix = new THREE.Matrix4();
   matrix.extractRotation(carro.carro.matrix);
-  let offset = new THREE.Vector3 (distanciaCamera3rdX, 4 ,distanciaCamera3rdZ);
+  let offset = new THREE.Vector3 (-distanciaCamera3rdX, 4 ,-distanciaCamera3rdZ);
   offset.applyMatrix4(matrix);
   let camera3rdPosition = carro.carro.position.clone().add(offset);
   camera3rd.position.set(camera3rdPosition.x, camera3rd.position.y, camera3rdPosition.z);
@@ -382,6 +434,8 @@ function render()
   keyboardUpdate();
   
   requestAnimationFrame(render);
+  carro.updateConvexObject();
+  
   switch(camMode){
     // trackballControls.update();
     // trackballControls.target.copy(carro.carro.position);
