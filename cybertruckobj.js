@@ -49,37 +49,29 @@ const numInstances = 100;
 // create the ground plane
 // scene.add(plane);
 let loader = new THREE.TextureLoader();
-function setMaterial(file, repeatU = 1, repeatV = 1, color = 'rgb(255,255,255)'){
-  let mat = new THREE.MeshBasicMaterial({ map: loader.load(file), color:color});
+function setMaterial(file, repeatU = 1, repeatV = 1, color = 'rgb(255,255,255)', opacity = 1){
+  let mat = new THREE.MeshBasicMaterial({ map: loader.load(file), color:color, opacity:opacity});
   mat.map.wrapS = mat.map.wrapT = THREE.RepeatWrapping;
   mat.map.minFilter = mat.map.magFilter = THREE.LinearFilter;
   mat.map.repeat.set(repeatU,repeatV); 
   return mat;
 }
 
-// var estruturaMaterial = new THREE.MeshPhongMaterial({
-//   color: 0x636d73,
-//   opacity: objOpacity,
-//   transparent: false,
-// });
+var estruturaMaterial = new THREE.MeshPhongMaterial({
+  color: 0x636d73,
+  opacity: objOpacity,
+  transparent: false,
+});
 
-let estruturaMaterial = setMaterial('../assets/textures/metalPreto.avif', 0.2, 1);
-
-const uvTeto = [
-  0, 0, 
-  1, 0,
-  1, 1,
-  1, 1,
-  0, 1
-  ];
+// let estruturaMaterial = setMaterial('../assets/textures/metalPreto.avif', 0.2, 1);
   
-// var vidroMaterial = new THREE.MeshPhongMaterial({
-//   color: 0x1f2224,
-//   opacity: objOpacity,
-//   transparent: true,
-// });
+var vidroMaterial = new THREE.MeshPhongMaterial({
+  color: 0x1f2224,
+  opacity: objOpacity,
+  transparent: true,
+});
 
-let vidroMaterial = setMaterial('../assets/textures/vidrocarro.avif', 1,1);
+// let vidroMaterial = setMaterial('../assets/textures/vidrocarro.avif', 1,1);
 
 var tampaMaterial = new THREE.MeshLambertMaterial({
    color: 0x1e1e1e,
@@ -194,7 +186,7 @@ export class Carro {
     
     this.criarPneu = function () {
       const rodas = new THREE.TorusGeometry(0.8, 0.3, 16, 50);
-      const material_rodas = new THREE.MeshLambertMaterial({ color: 0x1e1e1e});
+      const material_rodas = setMaterial('assets/textures/borracha.avif', 4, 2);
       const roda = new THREE.Mesh(rodas, material_rodas);
       return roda;
     };
@@ -354,7 +346,7 @@ export class Carro {
       new THREE.InstancedBufferAttribute(matrixTetoArray, 16)
     );
 
-    tetoInstanceGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvTeto , 0.2));
+
 
     vidroFrenteConvex = this.criaVidroFrente();
 
@@ -377,6 +369,15 @@ export class Carro {
     vidroFrente.receiveShadow = false;
     vidroFrente.visible = true;
     teto.add(vidroFrente);
+
+    let texturaVidroGeometry = new THREE.BoxGeometry(4.16, 3.5,0.01);
+    let texturaVidroMaterial = setMaterial('assets/textures/vidrocarro.avif',1,1,'rgb(255,255,255)', 0.1)
+    let texturaVidro = new THREE.Mesh(texturaVidroGeometry, texturaVidroMaterial);
+    
+    vidroFrente.add(texturaVidro);
+
+    texturaVidro.translateZ(1);
+    texturaVidro.translateY(0.25);
 
     const matrixVidroFrente = new THREE.Matrix4();
     const matrixVidroFrenteArray = new Float32Array(numInstances * 16);

@@ -182,23 +182,23 @@ export class Pista {
 
     this.pista = new THREE.Object3D();
 
-      this.posicoes.forEach((element, index) => {
-        if(index == 0){
-          let bloco = new THREE.Mesh(cubeGeometry, materialInicial);
-          bloco.position.set(element[0],element[1],element[2]);
-          bloco.receiveShadow = true;
-          this.pista.add(bloco);
-        }else{
-          let bloco = new THREE.Mesh(cubeGeometry, texturasPista[this.id - 1]);
-          bloco.position.set(element[0],element[1],element[2]);
-          bloco.receiveShadow = true;
-          this.pista.add(bloco);
-        }
-      });
-
-      this.getInicial = () => {
-        return this.posicoes[0];
+    this.posicoes.forEach((element, index) => {
+      if(index == 0){
+        let bloco = new THREE.Mesh(cubeGeometry, materialInicial);
+        bloco.position.set(element[0],element[1],element[2]);
+        bloco.receiveShadow = true;
+        this.pista.add(bloco);
+      }else{
+        let bloco = new THREE.Mesh(cubeGeometry, texturasPista[this.id - 1]);
+        bloco.position.set(element[0],element[1],element[2]);
+        bloco.receiveShadow = true;
+        this.pista.add(bloco);
       }
+    });
+
+    this.getInicial = () => {
+      return this.posicoes[0];
+    }
       
     this.scene.add(this.pista);
 
