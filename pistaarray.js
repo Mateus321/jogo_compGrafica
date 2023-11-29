@@ -231,6 +231,35 @@ export class Pista {
         return carro.checkpointsVisitados.includes(checkpoint);
       })
     }
+    
+    var faceArray = [];
+    var textureFront = new THREE.TextureLoader().load( '../assets/textures/cube/Bridge/negz.jpg');
+    var textureBack = new THREE.TextureLoader().load( '../assets/textures/cube/Bridge/posz.jpg');
+    var textureTop = new THREE.TextureLoader().load( '../assets/textures/cube/Bridge/posy.jpg');
+    textureTop.rotation = THREE.MathUtils.degToRad(-90);
+    textureTop.center = new THREE.Vector2(0.5, 0.5);
+    var textureBottom = new THREE.TextureLoader().load( '../assets/textures/cube/Bridge/negy.jpg');
+    textureBottom.rotation = THREE.MathUtils.degToRad(-90);
+    textureBottom.center = new THREE.Vector2(0.5, 0.5);
+    var textureRight = new THREE.TextureLoader().load( '../assets/textures/cube/Bridge/posx.jpg');
+    var textureLeft = new THREE.TextureLoader().load( '../assets/textures/cube/Bridge/negx.jpg');
+      
+    faceArray.push(new THREE.MeshBasicMaterial( { map: textureFront }));
+    faceArray.push(new THREE.MeshBasicMaterial( { map: textureBack }));
+    faceArray.push(new THREE.MeshBasicMaterial( { map: textureTop }));
+    faceArray.push(new THREE.MeshBasicMaterial( { map: textureBottom }));
+    faceArray.push(new THREE.MeshBasicMaterial( { map: textureRight }));
+    faceArray.push(new THREE.MeshBasicMaterial( { map: textureLeft }));
+       
+    for (var i = 0; i < 6; i++)
+      faceArray[i].side = THREE.BackSide;
+       
+    var skyboxGeometry = new THREE.BoxGeometry( 1000, 1000, 1000);
+    var skybox = new THREE.Mesh( skyboxGeometry, faceArray );
+    // skybox.rotateX(degreesToRadians(90));
+    scene.add( skybox );
+
+
   }
 }
 
